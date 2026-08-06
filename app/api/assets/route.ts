@@ -2,6 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/app/lib/db";
 import { Asset } from "@/app/models/Asset";
 
+import { z } from "zod";
+
+const AssetSchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().max(1000).optional(),
+  contentType: z.string().min(1),
+  fileMetadata: z.object({
+    name: z.string(),
+    mimeType: z.string(),
+    size: z.number().positive(),
+  }),
+  fingerprints: z.object({
+    sha256: z.string().length(64),
+    sha3: z.string().length(64).optional(),
+    blake3: z.string().length(64).optional(),
+    aiHash: z.string().optional(),
+  }),
+  ipfsCID: z.string().optional(),
+  thumbnailCID: z.string().optional(),
+  ownerAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
+});
+
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -25,7 +47,12 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const data = await req.json();
     
-    const newAsset = new Asset(data);
+    const parsed = AssetSchema.safeParse(data);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Validation failed", details: parsed.error.issues }, { status: 400 });
+    }
+    
+    const newAsset = new Asset(parsed.data);
     await newAsset.save();
     
     return NextResponse.json(newAsset, { status: 201 });
@@ -34,3 +61,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to create asset" }, { status: 500 });
   }
 }
+

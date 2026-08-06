@@ -36,14 +36,19 @@ contract Licensing is Ownable, ReentrancyGuard {
     // Asset Hash => Licensee Address => License Record
     mapping(bytes32 => mapping(address => LicenseRecord)) public licenses;
 
+    // Creator Address => Pending Withdrawal Amount
+    mapping(address => uint256) public pendingWithdrawals;
+
     event TermsSet(bytes32 indexed assetHash, uint256 pPrice, uint256 cPrice, uint256 ePrice);
     event LicensePurchased(bytes32 indexed assetHash, address indexed buyer, LicenseType lType, uint256 price);
+    event FundsWithdrawn(address indexed creator, uint256 amount);
 
     error NotOwner();
     error AssetNotRegistered();
     error InvalidPayment();
     error ExclusiveAlreadySold();
     error LicenseAlreadyOwned();
+    error NoFundsToWithdraw();
 
     constructor(address _registryAddress) Ownable(msg.sender) {
         registry = IOwnershipRegistry(_registryAddress);
@@ -101,11 +106,25 @@ contract Licensing is Ownable, ReentrancyGuard {
             timestamp: block.timestamp
         });
 
-        // Pay the creator
+        // Add to creator's pending withdrawals (Pull over Push)
         address creator = registry.getOwner(assetHash);
-        (bool success, ) = payable(creator).call{value: msg.value}("");
-        require(success, "Transfer failed");
+        pendingWithdrawals[creator] += msg.value;
 
         emit LicensePurchased(assetHash, msg.sender, lType, msg.value);
+    }
+
+    /**
+     * @notice Withdraws accumulated funds for a creator.
+     */
+    function withdrawFunds() external nonReentrant {
+        uint256 amount = pendingWithdrawals[msg.sender];
+        if (amount == 0) revert NoFundsToWithdraw();
+        
+        pendingWithdrawals[msg.sender] = 0;
+        
+        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        require(success, "Transfer failed");
+        
+        emit FundsWithdrawn(msg.sender, amount);
     }
 }
