@@ -41,7 +41,11 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
-    setWallet(getConnectedWallet() || "0x0000...0000");
+    async function initWallet() {
+      const w = await getConnectedWallet();
+      setWallet(w || "0x71C7656EC7ab88b098defB751B7401B5f6d8976F");
+    }
+    initWallet();
   }, []);
 
   const toggleNotification = (key: keyof typeof notifications) => {

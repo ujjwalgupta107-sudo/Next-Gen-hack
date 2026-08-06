@@ -29,9 +29,13 @@ export default function ProfilePage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setWallet(getConnectedWallet() || "0x0000...0000");
-    const stored = getStoredAssets();
-    setAssets(stored.length > 0 ? stored : generateMockAssets());
+    async function loadData() {
+      const w = await getConnectedWallet();
+      setWallet(w || "0x71C7656EC7ab88b098defB751B7401B5f6d8976F");
+      const stored = await getStoredAssets();
+      setAssets(stored);
+    }
+    loadData();
   }, []);
 
   const stats = [

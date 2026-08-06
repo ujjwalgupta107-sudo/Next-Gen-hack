@@ -71,14 +71,14 @@ export default function VerifyPage() {
     await sleep(2500);
 
     // Check exact match
-    const exactMatch = findAssetByHash(sha256);
+    const exactMatch = await findAssetByHash(sha256);
     if (exactMatch) {
       setMatchType("exact_match");
       setMatchedAsset(exactMatch);
       setSimilarity(100);
     } else {
       // Simulate near-match check (random for demo)
-      const allAssets = getStoredAssets();
+      const allAssets = await getStoredAssets();
       if (allAssets.length > 0 && Math.random() > 0.5) {
         setMatchType("near_match");
         setMatchedAsset(allAssets[0]);

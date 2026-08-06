@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/app/lib/db";
 import { Asset } from "@/app/models/Asset";
 
-export async function GET(req: NextRequest, { params }: { params: { sha256: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ sha256: string }> }) {
   try {
     await connectToDatabase();
+    const { sha256 } = await context.params;
     
-    const asset = await Asset.findOne({ "fingerprints.sha256": params.sha256 });
+    const asset = await Asset.findOne({ "fingerprints.sha256": sha256 });
     if (!asset) {
       return NextResponse.json({ error: "Asset not found" }, { status: 404 });
     }
@@ -18,13 +19,14 @@ export async function GET(req: NextRequest, { params }: { params: { sha256: stri
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { sha256: string } }) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ sha256: string }> }) {
   try {
     await connectToDatabase();
+    const { sha256 } = await context.params;
     const updateData = await req.json();
     
     const asset = await Asset.findOneAndUpdate(
-      { "fingerprints.sha256": params.sha256 },
+      { "fingerprints.sha256": sha256 },
       { $set: updateData },
       { new: true }
     );

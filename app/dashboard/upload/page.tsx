@@ -138,7 +138,7 @@ export default function UploadPage() {
       const blake3 = await generateBLAKE3(file);
 
       // Check for duplicate
-      const existing = findAssetByHash(sha256);
+      const existing = await findAssetByHash(sha256);
       if (existing) {
         setStage("duplicate");
         setResult(existing);
@@ -168,11 +168,12 @@ export default function UploadPage() {
 
       // Complete
       setProgress(100);
+      const wallet = await getConnectedWallet();
       const newAsset: Asset = {
         id: `asset-${Date.now()}`,
         title: title || file.name,
         description,
-        contentType: detectContentType(file.type),
+        contentType: detectContentType(file.name, file.type),
         fileMetadata: {
           name: file.name,
           mimeType: file.type || "application/octet-stream",
@@ -187,9 +188,10 @@ export default function UploadPage() {
           gasUsed: (Math.random() * 0.01).toFixed(6),
         },
         ipfsCID,
-        nftTokenId: mintNFT ? Math.floor(Math.random() * 10000) : null,
+        nftTokenId: mintNFT ? Math.floor(Math.random() * 10000) : undefined,
         status: "registered",
         verificationCount: 0,
+        ownerAddress: wallet || "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
         createdAt: new Date().toISOString(),
       };
 
@@ -406,13 +408,13 @@ export default function UploadPage() {
                   { label: "SHA-256 Hash", value: result.fingerprints.sha256, hash: true },
                   { label: "SHA3-256 Hash", value: result.fingerprints.sha3, hash: true },
                   { label: "BLAKE3 Hash", value: result.fingerprints.blake3, hash: true },
-                  { label: "Perceptual Hash", value: result.fingerprints.phash, hash: true },
+                  { label: "Perceptual Hash", value: result.fingerprints.phash || "N/A", hash: true },
                   { label: "IPFS CID", value: result.ipfsCID, hash: true },
                   { label: "Transaction Hash", value: result.blockchain.txHash, hash: true },
                   { label: "Block Number", value: result.blockchain.blockNumber.toLocaleString() },
                   { label: "Chain", value: result.blockchain.chain, badge: true },
                   { label: "Gas Used", value: `${result.blockchain.gasUsed} MATIC` },
-                  ...(result.nftTokenId !== null
+                  ...(result.nftTokenId !== null && result.nftTokenId !== undefined
                     ? [{ label: "NFT Token ID", value: `#${result.nftTokenId}`, badge: true }]
                     : []),
                 ].map((item) => (

@@ -55,12 +55,14 @@ export default function DashboardLayout({
   const [notifications, setNotifications] = useState(3);
 
   useEffect(() => {
-    let w = getConnectedWallet();
-    if (!w) {
-      w = generateMockWallet();
-      setConnectedWallet(w);
+    async function initWallet() {
+      let w = await getConnectedWallet();
+      if (!w) {
+        w = generateMockWallet();
+      }
+      setWallet(w);
     }
-    setWallet(w);
+    initWallet();
   }, []);
 
   const handleDisconnect = () => {

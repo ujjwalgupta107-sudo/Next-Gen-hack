@@ -564,9 +564,9 @@ function ContentSection() {
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {CONTENT_TYPES.map((type, i) => (
+          {CONTENT_TYPES.map((type: { id: string; label: string; icon: string; count: number }, i: number) => (
             <motion.div
-              key={type.value}
+              key={type.id || i}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}

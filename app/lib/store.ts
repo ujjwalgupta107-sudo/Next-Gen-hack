@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 
 export interface Asset {
   _id?: string;
+  id?: string;
   title: string;
   description: string;
   contentType: string;
@@ -17,6 +18,8 @@ export interface Asset {
     sha256: string;
     sha3: string;
     blake3: string;
+    phash?: string;
+    dhash?: string;
     aiHash?: string;
   };
   blockchain: {
@@ -28,7 +31,8 @@ export interface Asset {
   };
   ipfsCID: string;
   thumbnailCID?: string;
-  nftTokenId?: number;
+  thumbnailUrl?: string;
+  nftTokenId?: number | null;
   status: "registered" | "pending" | "disputed";
   verificationCount: number;
   ownerAddress: string;
@@ -37,11 +41,41 @@ export interface Asset {
 
 export interface VerificationResult {
   _id?: string;
+  id?: string;
   uploadedHash: string;
   result: "exact_match" | "near_match" | "no_match";
   matchedAssetId?: string;
+  matchedAsset?: Asset;
+  similarity?: number;
   similarityScore?: number;
   timestamp: string;
+}
+
+export const MOCK_STATS = {
+  totalAssets: 12840,
+  verifiedProofs: 9420,
+  activeDisputes: 14,
+  protectedValue: "$4.2M",
+  assetsProtected: 12840,
+  totalVerifications: 9420,
+  totalCreators: 3450,
+};
+
+export const CONTENT_TYPES = [
+  { id: "image", label: "Images & Artwork", icon: "ImageIcon", count: 4820 },
+  { id: "code", label: "Source Code & Scripts", icon: "CodeIcon", count: 3210 },
+  { id: "document", label: "Documents & Patents", icon: "FileTextIcon", count: 2940 },
+  { id: "audio", label: "Audio & Music", icon: "MusicIcon", count: 1870 },
+];
+
+export function detectContentType(filename: string, mimeType: string): string {
+  if (mimeType.startsWith("image/")) return "image";
+  if (mimeType.startsWith("audio/")) return "audio";
+  if (mimeType.startsWith("video/")) return "video";
+  if (mimeType === "application/pdf" || mimeType.includes("text")) return "document";
+  const ext = filename.split(".").pop()?.toLowerCase();
+  if (["js", "ts", "jsx", "tsx", "py", "sol", "cpp", "c", "java", "go", "rs", "html", "css", "json"].includes(ext || "")) return "code";
+  return "document";
 }
 
 // -----------------------------------------------------
@@ -132,4 +166,28 @@ export async function getConnectedWallet(): Promise<string | null> {
     }
   }
   return null;
+}
+
+export async function getStoredAssets(): Promise<Asset[]> {
+  return await fetchAssets();
+}
+
+export function generateMockAssets(): Asset[] {
+  return [];
+}
+
+export async function storeAsset(assetData: Partial<Asset>): Promise<Asset | null> {
+  return await createPendingAsset(assetData);
+}
+
+export async function findAssetByHash(sha256: string): Promise<Asset | null> {
+  return await fetchAssetByHash(sha256);
+}
+
+export async function storeVerification(verification: Partial<VerificationResult>): Promise<void> {
+  // Saved via backend
+}
+
+export function setConnectedWallet(wallet: string | null): void {
+  // Wallet state set in React component
 }

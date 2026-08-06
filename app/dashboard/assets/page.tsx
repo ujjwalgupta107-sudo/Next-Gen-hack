@@ -47,8 +47,11 @@ export default function AssetsPage() {
   const [filterType, setFilterType] = useState("all");
 
   useEffect(() => {
-    const stored = getStoredAssets();
-    setAssets(stored.length > 0 ? stored : generateMockAssets());
+    async function loadAssets() {
+      const stored = await getStoredAssets();
+      setAssets(stored);
+    }
+    loadAssets();
   }, []);
 
   const filteredAssets = assets.filter((a) => {
@@ -118,7 +121,7 @@ export default function AssetsPage() {
             const gradient = CONTENT_COLORS[asset.contentType] || "from-gray-500 to-gray-600";
             return (
               <motion.div
-                key={asset.id}
+                key={asset._id || asset.id || i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
@@ -177,7 +180,7 @@ export default function AssetsPage() {
                 const IconComp = CONTENT_ICONS[asset.contentType] || FileText;
                 return (
                   <motion.tr
-                    key={asset.id}
+                    key={asset._id || asset.id || i}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.03 }}

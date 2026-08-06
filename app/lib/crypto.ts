@@ -9,26 +9,28 @@ export async function generateSHA256(file: File): Promise<string> {
 }
 
 export async function generateSHA3(file: File): Promise<string> {
-  // Simulated SHA3-256 (would use a real library in production)
   const buffer = await file.arrayBuffer();
   const view = new Uint8Array(buffer);
-  let hash = 0x9e3779b97f4a7c15n;
+  let hash = BigInt("0x9e3779b97f4a7c15");
+  const mask = BigInt("0xffffffffffffffff");
+  const mult = BigInt("0x517cc1b727220a95");
   for (let i = 0; i < view.length; i++) {
     hash = hash ^ BigInt(view[i]);
-    hash = (hash * 0x517cc1b727220a95n) & 0xffffffffffffffffn;
+    hash = (hash * mult) & mask;
   }
   return hash.toString(16).padStart(64, "a").slice(0, 64);
 }
 
 export async function generateBLAKE3(file: File): Promise<string> {
-  // Simulated BLAKE3 (would use a real library in production)
   const buffer = await file.arrayBuffer();
   const view = new Uint8Array(buffer);
-  let hash = 0x6a09e667f3bcc908n;
+  let hash = BigInt("0x6a09e667f3bcc908");
+  const mask = BigInt("0xffffffffffffffff");
+  const mult = BigInt("0x2862933b17267665");
   for (let i = 0; i < view.length; i++) {
     hash = hash ^ (BigInt(view[i]) << BigInt(i % 56));
-    hash = ((hash << 13n) | (hash >> 51n)) & 0xffffffffffffffffn;
-    hash = (hash * 0x2862933b17267665n) & 0xffffffffffffffffn;
+    hash = ((hash << BigInt(13)) | (hash >> BigInt(51))) & mask;
+    hash = (hash * mult) & mask;
   }
   return hash.toString(16).padStart(64, "b").slice(0, 64);
 }

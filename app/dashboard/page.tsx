@@ -42,13 +42,12 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const stored = getStoredAssets();
-    if (stored.length > 0) {
+    async function loadAssets() {
+      const stored = await getStoredAssets();
       setAssets(stored);
-    } else {
-      setAssets(generateMockAssets());
+      setIsLoading(false);
     }
-    setIsLoading(false);
+    loadAssets();
   }, []);
 
   const stats = [
@@ -68,7 +67,7 @@ export default function DashboardPage() {
     },
     {
       label: "NFTs Minted",
-      value: assets.filter((a) => a.nftTokenId !== null).length.toString(),
+      value: assets.filter((a) => a.nftTokenId !== null && a.nftTokenId !== undefined).length.toString(),
       change: "+8%",
       icon: Blocks,
       gradient: "from-cyan-500 to-cyan-600",
@@ -83,7 +82,7 @@ export default function DashboardPage() {
   ];
 
   const recentActivity = assets.slice(0, 5).map((a, i) => ({
-    id: a.id,
+    id: a._id || a.id || `act-${i}`,
     type: i % 3 === 0 ? "registration" : i % 3 === 1 ? "verification" : "nft_mint",
     title: a.title,
     time: timeAgo(new Date(a.createdAt)),
@@ -306,7 +305,7 @@ export default function DashboardPage() {
                 const IconComp = CONTENT_ICONS[asset.contentType] || FileText;
                 return (
                   <motion.tr
-                    key={asset.id}
+                    key={asset._id || asset.id || i}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.05 }}
