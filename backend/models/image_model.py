@@ -20,8 +20,16 @@ class CLIPImageEmbedder:
             inputs = self.processor(images=image, return_tensors="pt").to(self.device)
             with torch.no_grad():
                 image_features = self.model_instance.get_image_features(**inputs)
+                if hasattr(image_features, "pooler_output") and image_features.pooler_output is not None:
+                    feat_tensor = image_features.pooler_output
+                elif hasattr(image_features, "image_embeds") and image_features.image_embeds is not None:
+                    feat_tensor = image_features.image_embeds
+                elif hasattr(image_features, "cpu"):
+                    feat_tensor = image_features
+                else:
+                    feat_tensor = image_features[0]
             
-            embedding = image_features.cpu().numpy().flatten().astype('float32')
+            embedding = feat_tensor.cpu().numpy().flatten().astype('float32')
             norm = np.linalg.norm(embedding)
             if norm > 0:
                 embedding = embedding / norm

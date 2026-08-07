@@ -26,5 +26,145 @@
     "isValid": true,
     "expiresAt": "2026-09-06T18:52:30.222Z",
     "lastUsedAt": "2026-08-07T18:52:32.728Z"
+  },
+  {
+    "userId": "local_user_1786128750221_ujqf2",
+    "refreshTokenHash": "b6a7b2eac832bb44dc7827a62320acdac2608891792b67253a3e7c27cb008157",
+    "walletAddress": "0xfa23d30df24fab7125acff9751f9aeb059838b01",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T18:52:35.236Z",
+    "lastUsedAt": "2026-08-07T18:52:37.742Z"
+  },
+  {
+    "userId": "local_user_1786128805028_l2mlr",
+    "refreshTokenHash": "ce19a1da3770990f2090941f0df0f837acc5edc8b7293324e6acf268c3e0dd42",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "ipAddress": "::1",
+    "isValid": false,
+    "expiresAt": "2026-09-06T18:53:25.031Z",
+    "lastUsedAt": "2026-08-07T18:53:27.547Z"
+  },
+  {
+    "userId": "local_user_1786129145932_n2txn",
+    "refreshTokenHash": "f42f642e1cfe3522abfcf10f963f8266f14c5f3f85c427d39b22710e562ed6fa",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T18:59:05.935Z",
+    "lastUsedAt": "2026-08-07T18:59:08.439Z"
+  },
+  {
+    "userId": "local_user_1786129145932_n2txn",
+    "refreshTokenHash": "014fd2d5a3f3dae473106fda89b30ccc068bc0403532209cfb407c468da8eed2",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T18:59:13.788Z",
+    "lastUsedAt": "2026-08-07T18:59:16.295Z"
+  },
+  {
+    "userId": "local_user_1786129161391_q6vuw",
+    "refreshTokenHash": "60667fd5c61c00cd816f10b5fa9cf7aada13074a066726459d8a77dd6d5c84b9",
+    "walletAddress": "0x584900e39c9a74efefef32d1fad0f033485c3773",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T18:59:21.393Z",
+    "lastUsedAt": "2026-08-07T18:59:23.906Z"
+  },
+  {
+    "userId": "local_user_1786129161391_q6vuw",
+    "refreshTokenHash": "74d4d40b50c605498789587b3af29e9d6e57062d8d9f978b5da58b37a13f30db",
+    "walletAddress": "0x584900e39c9a74efefef32d1fad0f033485c3773",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T18:59:26.420Z",
+    "lastUsedAt": "2026-08-07T18:59:28.930Z"
+  },
+  {
+    "userId": "local_user_1786129885121_6xkw0",
+    "refreshTokenHash": "dcd7047d5d6cdb0fc88058fbb13ac30ab5b7acfc26d78335d77345b8389192cf",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T19:11:25.124Z",
+    "lastUsedAt": "2026-08-07T19:11:27.629Z"
+  },
+  {
+    "userId": "local_user_1786130240589_vrsae",
+    "refreshTokenHash": "16ecd4c788438f03ff7f46d71fe9ed2f4f747bf1866e0e73c3e303ee075244b6",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T19:17:20.591Z",
+    "lastUsedAt": "2026-08-07T19:17:23.098Z"
+  },
+  {
+    "userId": "local_user_1786130240589_vrsae",
+    "refreshTokenHash": "369c4e14e52b5ef7d9f5420e85cd15d52c471f2134c4908f7c5d87007700117d",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T19:17:28.335Z",
+    "lastUsedAt": "2026-08-07T19:17:30.840Z"
+  },
+  {
+    "userId": "local_user_1786130255903_0qgr4",
+    "refreshTokenHash": "4a642e848baa01f8398806f32c565df1920a54749a0919cfdedf708881f13d1c",
+    "walletAddress": "0xa9cc2c9d01e9a988a3ab4e034c79db56c2f9711e",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T19:17:35.905Z",
+    "lastUsedAt": "2026-08-07T19:17:38.409Z"
+  },
+  {
+    "userId": "local_user_1786130700035_pn83g",
+    "refreshTokenHash": "34a5b88e4fa35e4058b93ab48aad9e1735974b37537a06eb4cfe22f9dfe5c362",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T19:25:00.037Z",
+    "lastUsedAt": "2026-08-07T19:25:02.541Z"
+  },
+  {
+    "userId": "local_user_1786130734197_pdmb5",
+    "refreshTokenHash": "aa687a806a6f6e16ca029d14f8e0e51cd76792686ede268cf80e259b645eaa65",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T19:25:34.199Z",
+    "lastUsedAt": "2026-08-07T19:25:36.705Z"
+  },
+  {
+    "userId": "local_user_1786130734197_pdmb5",
+    "refreshTokenHash": "4242569e9874505aea681cad7c8d528b2d86d1246878b79e332ab5f3b807b440",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T19:25:41.935Z",
+    "lastUsedAt": "2026-08-07T19:25:44.441Z"
+  },
+  {
+    "userId": "local_user_1786130749482_0ucpp",
+    "refreshTokenHash": "42aad5cb15eb26d32068385320bd8f7f9f5d606b7595e9905405377413a039d4",
+    "walletAddress": "0x53b1095e889d9bfb5d7515d67b9cb353cbb5a16d",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T19:25:49.484Z",
+    "lastUsedAt": "2026-08-07T19:25:51.989Z"
+  },
+  {
+    "userId": "local_user_1786131224838_4qqal",
+    "refreshTokenHash": "e29aa7bd4f7f5832f92f4bd259761053f26b6b7cf1857d833be566550ae83f50",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "ipAddress": "::1",
+    "isValid": false,
+    "expiresAt": "2026-09-06T19:33:44.842Z",
+    "lastUsedAt": "2026-08-07T19:33:47.350Z"
   }
 ]

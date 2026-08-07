@@ -1,5 +1,111 @@
 [
   {
+    "userId": "local_user_1786131224838_4qqal",
+    "action": "signup",
+    "description": "User ujjwal_107 registered with email",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "metadata": {},
+    "timestamp": "2026-08-07T19:33:49.856Z"
+  },
+  {
+    "userId": "local_user_1786130734197_pdmb5",
+    "action": "login",
+    "description": "User sec_user_1473 logged in via credentials",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "",
+    "metadata": {},
+    "timestamp": "2026-08-07T19:25:46.945Z"
+  },
+  {
+    "userId": "local_user_1786130734197_pdmb5",
+    "action": "signup",
+    "description": "User sec_user_1473 registered with email",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "",
+    "metadata": {},
+    "timestamp": "2026-08-07T19:25:39.212Z"
+  },
+  {
+    "userId": "audit-user-001",
+    "action": "REGISTER_ASSET",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "ProofVault Test Runner",
+    "metadata": {},
+    "timestamp": "2026-08-07T19:25:10.270Z"
+  },
+  {
+    "userId": "local_user_1786130700035_pn83g",
+    "action": "signup",
+    "description": "User db_user_7307 registered with email",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "",
+    "metadata": {},
+    "timestamp": "2026-08-07T19:25:05.047Z"
+  },
+  {
+    "userId": "local_user_1786130240589_vrsae",
+    "action": "login",
+    "description": "User sec_user_7865 logged in via credentials",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "",
+    "metadata": {},
+    "timestamp": "2026-08-07T19:17:33.354Z"
+  },
+  {
+    "userId": "local_user_1786130240589_vrsae",
+    "action": "signup",
+    "description": "User sec_user_7865 registered with email",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "",
+    "metadata": {},
+    "timestamp": "2026-08-07T19:17:25.611Z"
+  },
+  {
+    "userId": "audit-user-001",
+    "action": "REGISTER_ASSET",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "ProofVault Test Runner",
+    "metadata": {},
+    "timestamp": "2026-08-07T19:11:35.357Z"
+  },
+  {
+    "userId": "local_user_1786129885121_6xkw0",
+    "action": "signup",
+    "description": "User db_user_2385 registered with email",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "",
+    "metadata": {},
+    "timestamp": "2026-08-07T19:11:30.134Z"
+  },
+  {
+    "userId": "local_user_1786129145932_n2txn",
+    "action": "login",
+    "description": "User creator_3096 logged in via credentials",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "",
+    "metadata": {},
+    "timestamp": "2026-08-07T18:59:18.812Z"
+  },
+  {
+    "userId": "local_user_1786129145932_n2txn",
+    "action": "signup",
+    "description": "User creator_3096 registered with email",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "",
+    "metadata": {},
+    "timestamp": "2026-08-07T18:59:10.947Z"
+  },
+  {
+    "userId": "local_user_1786128805028_l2mlr",
+    "action": "signup",
+    "description": "User ujjwal00 registered with email",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "metadata": {},
+    "timestamp": "2026-08-07T18:53:30.052Z"
+  },
+  {
     "userId": "local_user_1786128734923_hmo2m",
     "action": "login",
     "description": "User creator_2189 logged in via credentials",
