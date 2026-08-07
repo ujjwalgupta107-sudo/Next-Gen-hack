@@ -22,7 +22,7 @@ import {
   Copy,
   MoreVertical,
 } from "lucide-react";
-import { getStoredAssets, generateMockAssets, type Asset } from "../../lib/store";
+import { getStoredAssets, type Asset } from "../../lib/store";
 import { shortenHash, formatDate, formatFileSize } from "../../lib/crypto";
 
 const CONTENT_ICONS: Record<string, typeof Image> = {

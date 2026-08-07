@@ -4,34 +4,26 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   FileKey,
-  Shield,
   CheckCircle2,
-  Clock,
   AlertCircle,
-  Tag,
   DollarSign,
   Users,
-  Calendar,
-  ArrowUpRight,
-  Copy,
-  ExternalLink,
-  Filter,
+  Loader2,
 } from "lucide-react";
-import { shortenHash, shortenAddress } from "../../lib/crypto";
+import { ethers } from "ethers";
+import { LICENSING_CONTRACT_ADDRESS } from "../../lib/store";
 
 const LICENSES = [
-  { id: "lic-1", asset: "Abstract Neon Cityscape", type: "Commercial", licensee: "0x7a3B...4d2F", price: "0.5 MATIC", status: "active", startDate: "2026-07-15", endDate: "2027-07-15", usageCount: 3, usageLimit: 0 },
-  { id: "lic-2", asset: "Lo-Fi Hip Hop Beat Pack", type: "Personal", licensee: "0x9c1E...8a3B", price: "0.2 MATIC", status: "active", startDate: "2026-08-01", endDate: "2027-08-01", usageCount: 1, usageLimit: 5 },
-  { id: "lic-3", asset: "React Component Library", type: "Exclusive", licensee: "0x5f4D...2c1A", price: "5.0 MATIC", status: "active", startDate: "2026-06-20", endDate: null, usageCount: 0, usageLimit: 0 },
-  { id: "lic-4", asset: "Cinematic Drone Footage", type: "Royalty", licensee: "0x2b8A...6e9C", price: "1.0 MATIC", status: "expired", startDate: "2025-08-01", endDate: "2026-08-01", usageCount: 12, usageLimit: 0 },
-  { id: "lic-5", asset: "Brand Identity Design", type: "Commercial", licensee: "0x8e2C...9f4A", price: "2.0 MATIC", status: "pending", startDate: "2026-08-06", endDate: "2027-08-06", usageCount: 0, usageLimit: 10 },
+  { id: "lic-1", asset: "Abstract Neon Cityscape", type: "Commercial", licensee: "0x7a3B...4d2F", price: "0.05 MATIC", status: "active", startDate: "2026-07-15", endDate: "2027-07-15", usageCount: 3, usageLimit: 0 },
+  { id: "lic-2", asset: "Lo-Fi Hip Hop Beat Pack", type: "Personal", licensee: "0x9c1E...8a3B", price: "0.02 MATIC", status: "active", startDate: "2026-08-01", endDate: "2027-08-01", usageCount: 1, usageLimit: 5 },
+  { id: "lic-3", asset: "React Component Library", type: "Exclusive", licensee: "0x5f4D...2c1A", price: "0.10 MATIC", status: "active", startDate: "2026-06-20", endDate: null, usageCount: 0, usageLimit: 0 },
+  { id: "lic-4", asset: "Cinematic Drone Footage", type: "Commercial", licensee: "0x2b8A...6e9C", price: "0.15 MATIC", status: "expired", startDate: "2025-08-01", endDate: "2026-08-01", usageCount: 12, usageLimit: 0 },
 ];
 
 const TYPE_COLORS: Record<string, string> = {
   Personal: "badge-blue",
   Commercial: "badge-green",
   Exclusive: "badge-purple",
-  Royalty: "badge-amber",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -40,30 +32,72 @@ const STATUS_COLORS: Record<string, string> = {
   pending: "badge-amber",
 };
 
+const LICENSING_ABI = ["function withdrawFunds() external"];
+
 export default function LicensesPage() {
   const [tab, setTab] = useState<"issued" | "purchased">("issued");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [withdrawMsg, setWithdrawMsg] = useState<string | null>(null);
 
   const filtered = filterStatus === "all" ? LICENSES : LICENSES.filter((l) => l.status === filterStatus);
+
+  const handleWithdrawFunds = async () => {
+    setIsWithdrawing(true);
+    setWithdrawMsg(null);
+    try {
+      if (typeof window !== "undefined" && (window as any).ethereum) {
+        const provider = new ethers.BrowserProvider((window as any).ethereum);
+        const signer = await provider.getSigner();
+        const contract = new ethers.Contract(LICENSING_CONTRACT_ADDRESS, LICENSING_ABI, signer);
+        const tx = await contract.withdrawFunds();
+        await tx.wait();
+        setWithdrawMsg(`Withdrawn successfully! Tx: ${tx.hash.slice(0, 10)}...`);
+      } else {
+        setWithdrawMsg("Connect MetaMask on Polygon Amoy to withdraw earnings.");
+      }
+    } catch (err: any) {
+      console.warn(err);
+      setWithdrawMsg("No pending earnings to withdraw or transaction rejected.");
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-7xl">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          <FileKey className="w-6 h-6 text-green-400" />
-          License Center
-        </h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Manage licensing terms for your digital assets
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <FileKey className="w-6 h-6 text-green-400" />
+            License Management & Pull-Withdrawals
+          </h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">
+            Manage licensing terms, view active licenses, and withdraw accumulated smart contract earnings.
+          </p>
+        </div>
+        <button
+          onClick={handleWithdrawFunds}
+          disabled={isWithdrawing}
+          className="btn-primary text-xs py-2 px-4 flex items-center gap-2"
+        >
+          {isWithdrawing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <DollarSign className="w-3.5 h-3.5" />}
+          Withdraw Revenue (0.32 MATIC)
+        </button>
       </div>
+
+      {withdrawMsg && (
+        <div className="glass-card p-3 border border-blue-500/30 text-xs text-blue-400">
+          {withdrawMsg}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Active Licenses", value: "23", icon: CheckCircle2, color: "text-green-400" },
-          { label: "Revenue", value: "45.6 MATIC", icon: DollarSign, color: "text-blue-400" },
+          { label: "Total Revenue", value: "0.32 MATIC", icon: DollarSign, color: "text-blue-400" },
           { label: "Licensees", value: "18", icon: Users, color: "text-purple-400" },
           { label: "Expiring Soon", value: "3", icon: AlertCircle, color: "text-amber-400" },
         ].map((s) => (
@@ -104,7 +138,7 @@ export default function LicensesPage() {
                 : "text-[var(--text-muted)] hover:text-white bg-white/[0.02] border border-transparent"
             }`}
           >
-            {s === "all" ? "All" : s}
+            {s === "all" ? "All Statuses" : s}
           </button>
         ))}
       </div>
@@ -140,36 +174,17 @@ export default function LicensesPage() {
                   <p className="font-semibold text-white">{license.price}</p>
                 </div>
                 <div className="text-right hidden sm:block">
-                  <p className="text-[var(--text-muted)] text-[11px]">Usage</p>
+                  <p className="text-[var(--text-muted)] text-[11px]">Usage Count</p>
                   <p className="text-white">{license.usageCount}{license.usageLimit > 0 ? `/${license.usageLimit}` : "/∞"}</p>
                 </div>
                 <div className="text-right hidden md:block">
-                  <p className="text-[var(--text-muted)] text-[11px]">Expires</p>
+                  <p className="text-[var(--text-muted)] text-[11px]">Expiration</p>
                   <p className="text-white text-xs">{license.endDate || "Perpetual"}</p>
                 </div>
               </div>
             </div>
           </motion.div>
         ))}
-      </div>
-
-      {/* License Types Info */}
-      <div className="glass-card p-6">
-        <h3 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">License Types</h3>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { type: "Personal", desc: "Non-commercial, single user use", price: "From 0.1 MATIC" },
-            { type: "Commercial", desc: "Full commercial rights for business use", price: "From 0.5 MATIC" },
-            { type: "Exclusive", desc: "Sole licensee, no other licenses issued", price: "From 5.0 MATIC" },
-            { type: "Royalty", desc: "Revenue sharing on derivative works", price: "5% royalty" },
-          ].map((t) => (
-            <div key={t.type} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <span className={`badge ${TYPE_COLORS[t.type]} text-[10px] mb-3`}>{t.type}</span>
-              <p className="text-xs text-[var(--text-secondary)] mb-2">{t.desc}</p>
-              <p className="text-xs font-semibold text-white">{t.price}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

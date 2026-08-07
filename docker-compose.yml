@@ -12,8 +12,10 @@ services:
       - MONGODB_URI=mongodb://mongo:27017/proofvault
       - NEXT_PUBLIC_FASTAPI_URL=http://backend:8000
     depends_on:
-      - mongo
-      - backend
+      mongo:
+        condition: service_healthy
+      backend:
+        condition: service_started
     restart: always
 
   backend:
@@ -24,17 +26,23 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
-    depends_on:
-      - mongo
+    volumes:
+      - vector_data:/app/vector_data
     restart: always
 
   mongo:
-    image: mongo:latest
+    image: mongo:7.0
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
 volumes:
   mongodb_data:
+  vector_data:

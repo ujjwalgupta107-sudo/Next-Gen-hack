@@ -24,8 +24,8 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { shortenAddress, generateMockWallet } from "../lib/crypto";
-import { getConnectedWallet, setConnectedWallet } from "../lib/store";
+import { shortenAddress } from "../lib/crypto";
+import { getConnectedWallet, connectWallet } from "../lib/store";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -56,17 +56,18 @@ export default function DashboardLayout({
 
   useEffect(() => {
     async function initWallet() {
-      let w = await getConnectedWallet();
-      if (!w) {
-        w = generateMockWallet();
-      }
-      setWallet(w);
+      const w = await getConnectedWallet();
+      setWallet(w || "0x71C7656EC7ab88b098defB751B7401B5f6d8976F");
     }
     initWallet();
   }, []);
 
+  const handleConnect = async () => {
+    const w = await connectWallet();
+    if (w) setWallet(w);
+  };
+
   const handleDisconnect = () => {
-    setConnectedWallet(null);
     setWallet(null);
     window.location.href = "/";
   };

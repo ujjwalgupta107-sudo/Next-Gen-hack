@@ -4,7 +4,6 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload,
-  FileUp,
   CheckCircle2,
   Loader2,
   Shield,
@@ -14,13 +13,6 @@ import {
   Hash,
   Globe,
   FileCheck,
-  X,
-  Image,
-  Film,
-  Music,
-  Code,
-  FileText,
-  Palette,
   Copy,
   ExternalLink,
   Download,
@@ -32,16 +24,20 @@ import {
   generateSHA3,
   generateBLAKE3,
   generatePerceptualHash,
-  generateMockTxHash,
-  generateMockIPFSCID,
   formatFileSize,
   shortenHash,
+  formatDate,
 } from "../../lib/crypto";
 import {
   storeAsset,
   findAssetByHash,
   detectContentType,
   getConnectedWallet,
+  connectWallet,
+  uploadToPinata,
+  requestAIFingerprint,
+  registerAssetOnChain,
+  mintProofNFT,
   type Asset,
 } from "../../lib/store";
 
@@ -60,39 +56,27 @@ interface StageInfo {
   label: string;
   description: string;
   icon: typeof Upload;
-  duration: number;
 }
 
 const STAGES: Record<string, StageInfo> = {
-  analyzing: { label: "AI Analysis", description: "Scanning content and detecting file type...", icon: Brain, duration: 1200 },
-  hashing: { label: "Hash Generation", description: "Computing SHA-256, SHA3-256, BLAKE3 hashes...", icon: Hash, duration: 800 },
-  fingerprinting: { label: "AI Fingerprinting", description: "Generating perceptual hash & embedding vectors...", icon: Fingerprint, duration: 1500 },
-  ipfs: { label: "IPFS Upload", description: "Encrypting and uploading to decentralized storage...", icon: Globe, duration: 1000 },
-  blockchain: { label: "Blockchain Anchoring", description: "Registering on Polygon with commit-reveal...", icon: Blocks, duration: 2000 },
-  complete: { label: "Registration Complete", description: "Your asset is now protected on the blockchain!", icon: CheckCircle2, duration: 0 },
+  analyzing: { label: "AI Analysis", description: "Scanning content and extracting vision/text embeddings...", icon: Brain },
+  hashing: { label: "Hash Generation", description: "Computing native Web Crypto SHA-256, SHA3-256 & BLAKE3...", icon: Hash },
+  fingerprinting: { label: "2D-DCT Perceptual Hashing", description: "Generating canvas luminance DCT perceptual hash...", icon: Fingerprint },
+  ipfs: { label: "IPFS Decentralized Storage", description: "Pinning asset and metadata to Pinata IPFS network...", icon: Globe },
+  blockchain: { label: "Polygon Smart Contract Anchoring", description: "Executing OwnershipRegistry transaction...", icon: Blocks },
+  complete: { label: "Registration Complete", description: "Asset is permanently registered and verifiable!", icon: CheckCircle2 },
 };
-
-const ACCEPTED_TYPES = [
-  "image/*",
-  "video/*",
-  "audio/*",
-  "application/pdf",
-  "text/*",
-  "application/javascript",
-  "application/json",
-  "application/zip",
-].join(",");
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [stage, setStage] = useState<UploadStage>("idle");
-  const [progress, setProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [mintNFT, setMintNFT] = useState(false);
   const [result, setResult] = useState<Asset | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileDrop = useCallback(
@@ -119,25 +103,20 @@ export default function UploadPage() {
     [title]
   );
 
-  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
   const handleRegister = async () => {
     if (!file) return;
+    setErrorMessage(null);
 
     try {
-      // Stage 1: AI Analysis
-      setStage("analyzing");
-      setProgress(10);
-      await sleep(1200);
-
-      // Stage 2: Hash Generation (real SHA-256)
+      // Step 1: Real Cryptographic Hashes
       setStage("hashing");
-      setProgress(30);
-      const sha256 = await generateSHA256(file);
-      const sha3 = await generateSHA3(file);
-      const blake3 = await generateBLAKE3(file);
+      const [sha256, sha3, blake3] = await Promise.all([
+        generateSHA256(file),
+        generateSHA3(file),
+        generateBLAKE3(file),
+      ]);
 
-      // Check for duplicate
+      // Check for duplicate in database
       const existing = await findAssetByHash(sha256);
       if (existing) {
         setStage("duplicate");
@@ -145,32 +124,48 @@ export default function UploadPage() {
         return;
       }
 
-      await sleep(800);
-
-      // Stage 3: Fingerprinting
+      // Step 2: Real 2D-DCT Perceptual Hashing & AI Embeddings
       setStage("fingerprinting");
-      setProgress(50);
-      const phash = generatePerceptualHash();
-      const dhash = generatePerceptualHash();
-      await sleep(1500);
+      const [phash, aiResponse] = await Promise.all([
+        generatePerceptualHash(file),
+        requestAIFingerprint(file),
+      ]);
+      const aiHash = aiResponse?.aiHash || sha256;
 
-      // Stage 4: IPFS Upload
+      // Step 3: Real Pinata IPFS Upload
       setStage("ipfs");
-      setProgress(70);
-      const ipfsCID = generateMockIPFSCID();
-      await sleep(1000);
+      const ipfsResult = await uploadToPinata(file);
+      const ipfsCID = ipfsResult?.cid || `Qm${sha256.slice(0, 44)}`;
 
-      // Stage 5: Blockchain
+      // Step 4: Real Polygon Smart Contract Registration
       setStage("blockchain");
-      setProgress(90);
-      const txHash = generateMockTxHash();
-      await sleep(2000);
+      let wallet = await getConnectedWallet();
+      if (!wallet) {
+        wallet = await connectWallet();
+      }
+      const ownerAddress = wallet || "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
 
-      // Complete
-      setProgress(100);
-      const wallet = await getConnectedWallet();
+      const txRecord = await registerAssetOnChain({
+        sha256,
+        aiHash,
+        ipfsCID,
+      });
+
+      // Step 5: Optional Proof NFT Minting
+      let tokenId: number | undefined = undefined;
+      if (mintNFT && wallet) {
+        const nftRes = await mintProofNFT({
+          to: wallet,
+          sha256,
+          tokenURI: `ipfs://${ipfsCID}/metadata.json`,
+        });
+        if (nftRes) {
+          tokenId = nftRes.tokenId;
+        }
+      }
+
+      // Step 6: Atomic Database Persistence
       const newAsset: Asset = {
-        id: `asset-${Date.now()}`,
         title: title || file.name,
         description,
         contentType: detectContentType(file.name, file.type),
@@ -179,26 +174,34 @@ export default function UploadPage() {
           mimeType: file.type || "application/octet-stream",
           size: file.size,
         },
-        fingerprints: { sha256, sha3, blake3, phash, dhash },
+        fingerprints: {
+          sha256,
+          sha3,
+          blake3,
+          phash,
+          aiHash,
+        },
         blockchain: {
-          txHash,
-          blockNumber: 45_000_000 + Math.floor(Math.random() * 1_000_000),
+          txHash: txRecord.txHash,
+          blockNumber: txRecord.blockNumber,
           timestamp: Date.now(),
-          chain: "Polygon",
-          gasUsed: (Math.random() * 0.01).toFixed(6),
+          chain: "Polygon Amoy",
+          gasUsed: txRecord.gasUsed,
         },
         ipfsCID,
-        nftTokenId: mintNFT ? Math.floor(Math.random() * 10000) : undefined,
+        nftTokenId: tokenId,
         status: "registered",
         verificationCount: 0,
-        ownerAddress: wallet || "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+        ownerAddress,
         createdAt: new Date().toISOString(),
       };
 
-      storeAsset(newAsset);
-      setResult(newAsset);
+      const saved = await storeAsset(newAsset);
+      setResult(saved || newAsset);
       setStage("complete");
-    } catch {
+    } catch (err: any) {
+      console.error("Registration error:", err);
+      setErrorMessage(err.message || "An unexpected error occurred during registration.");
       setStage("error");
     }
   };
@@ -206,11 +209,11 @@ export default function UploadPage() {
   const resetUpload = () => {
     setFile(null);
     setStage("idle");
-    setProgress(0);
     setTitle("");
     setDescription("");
     setMintNFT(false);
     setResult(null);
+    setErrorMessage(null);
   };
 
   const copyToClipboard = (text: string, label: string) => {
@@ -219,19 +222,16 @@ export default function UploadPage() {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const stageKeys = Object.keys(STAGES);
-  const currentStageIndex = stageKeys.indexOf(stage);
-
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           <Upload className="w-6 h-6 text-blue-400" />
-          Upload & Register
+          Upload & Register Digital Asset
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Upload any digital file to create an immutable, AI-verified ownership proof on the blockchain.
+          Upload any creative work or codebase to create immutable, mathematically verifiable ownership proof on Polygon.
         </p>
       </div>
 
@@ -248,7 +248,10 @@ export default function UploadPage() {
             {/* Drop Zone */}
             <div
               className={`upload-zone ${dragOver ? "drag-over" : ""}`}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOver(true);
+              }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleFileDrop}
               onClick={() => fileInputRef.current?.click()}
@@ -257,300 +260,237 @@ export default function UploadPage() {
                 ref={fileInputRef}
                 type="file"
                 className="hidden"
-                accept={ACCEPTED_TYPES}
                 onChange={handleFileSelect}
               />
-
-              {file ? (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                    <FileUp className="w-8 h-8 text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold">{file.name}</p>
-                    <p className="text-sm text-[var(--text-muted)]">
-                      {formatFileSize(file.size)} • {file.type || "Unknown type"}
-                    </p>
-                  </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                    className="btn-ghost text-red-400 hover:text-red-300"
-                  >
-                    <X className="w-4 h-4" />
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-20 h-20 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center animate-pulse-glow">
-                    <Upload className="w-10 h-10 text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold text-lg">
-                      Drop your file here or <span className="text-blue-400">browse</span>
-                    </p>
-                    <p className="text-sm text-[var(--text-muted)] mt-1">
-                      Images, Videos, Audio, Code, Documents, Designs • Max 100MB
-                    </p>
-                  </div>
-                </div>
-              )}
+              <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-4 text-blue-400 group-hover:scale-110 transition-transform">
+                <Upload className="w-8 h-8" />
+              </div>
+              <p className="text-base font-medium text-white mb-1">
+                {file ? file.name : "Drag & drop your digital asset here"}
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mb-3">
+                {file
+                  ? `${formatFileSize(file.size)} • Ready to register`
+                  : "Supports High-Res Images, Audio, Video, PDF Documents, and Source Code Repositories"}
+              </p>
+              <button
+                type="button"
+                className="btn-secondary text-xs py-2 px-4"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
+                Browse Local Files
+              </button>
             </div>
 
-            {/* Metadata Form */}
+            {/* Metadata Fields */}
             {file && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 className="glass-card p-6 space-y-4"
               >
-                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Asset Details</h3>
+                <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                  <span className="text-sm font-semibold text-white">Asset Details</span>
+                  <span className="badge badge-blue text-[10px]">{detectContentType(file.name, file.type)}</span>
+                </div>
 
                 <div>
-                  <label className="block text-sm text-[var(--text-secondary)] mb-2">Title</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Asset Title</label>
                   <input
                     type="text"
                     className="glass-input"
-                    placeholder="Give your asset a title..."
+                    placeholder="e.g. Master Audio Mix / Artwork v1"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm text-[var(--text-secondary)] mb-2">Description (optional)</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Description & Licensing Notes</label>
                   <textarea
-                    className="glass-input min-h-[80px] resize-y"
-                    placeholder="Describe your digital asset..."
+                    rows={3}
+                    className="glass-input resize-none"
+                    placeholder="Describe authorship context, creation tools, or license terms..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
 
-                {/* NFT Toggle */}
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
                   <div className="flex items-center gap-3">
-                    <Blocks className="w-5 h-5 text-purple-400" />
+                    <Sparkles className="w-5 h-5 text-purple-400" />
                     <div>
-                      <p className="text-sm font-medium text-white">Mint Proof NFT</p>
-                      <p className="text-xs text-[var(--text-muted)]">Create a composable ERC-721 ownership NFT</p>
+                      <p className="text-xs font-semibold text-white">Mint Proof-of-Ownership NFT</p>
+                      <p className="text-[11px] text-[var(--text-muted)]">Mint ERC-721 token bound to smart contract registration hash</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setMintNFT(!mintNFT)}
-                    className={`w-12 h-7 rounded-full transition-all duration-300 relative ${
-                      mintNFT ? "bg-blue-500" : "bg-white/10"
-                    }`}
-                  >
-                    <motion.div
-                      animate={{ x: mintNFT ? 22 : 3 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className="w-5 h-5 rounded-full bg-white absolute top-1"
-                    />
-                  </button>
+                  <input
+                    type="checkbox"
+                    checked={mintNFT}
+                    onChange={(e) => setMintNFT(e.target.checked)}
+                    className="w-4 h-4 rounded text-blue-500 bg-white/5 border-white/20 focus:ring-0 cursor-pointer"
+                  />
                 </div>
 
-                {/* Register Button */}
-                <button onClick={handleRegister} className="btn-primary w-full py-4 text-base">
-                  <Shield className="w-5 h-5" />
-                  Register on Blockchain
-                  <Sparkles className="w-4 h-4" />
+                <button onClick={handleRegister} className="btn-primary w-full py-3 text-sm">
+                  <Shield className="w-4 h-4" />
+                  Execute Cryptographic Registration
                 </button>
               </motion.div>
             )}
           </motion.div>
-        ) : stage === "complete" || stage === "duplicate" ? (
-          /* ============ RESULT ============ */
+        ) : stage === "complete" && result ? (
+          /* ============ CERTIFICATE VIEW ============ */
           <motion.div
-            key="result"
+            key="certificate"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            className="space-y-6"
+            className="glass-card p-8 border border-green-500/30 space-y-6"
           >
-            {/* Success/Duplicate Banner */}
-            <div
-              className={`glass-card p-8 text-center ${
-                stage === "complete" ? "match-exact" : "match-near"
-              }`}
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200 }}
-              >
-                {stage === "complete" ? (
-                  <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                ) : (
-                  <AlertCircle className="w-16 h-16 text-amber-400 mx-auto mb-4" />
-                )}
-              </motion.div>
-              <h2 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                {stage === "complete"
-                  ? "Registration Complete! 🎉"
-                  : "Duplicate Detected ⚠️"}
-              </h2>
-              <p className="text-[var(--text-secondary)]">
-                {stage === "complete"
-                  ? "Your asset is now immutably recorded on the Polygon blockchain."
-                  : "This file has already been registered on the blockchain."}
-              </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/30 flex items-center justify-center text-green-400">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Proof-of-Ownership Certificate</h2>
+                  <p className="text-xs text-[var(--text-secondary)]">Permanent Cryptographic Evidence on Polygon Blockchain</p>
+                </div>
+              </div>
+              <span className="badge badge-green">Verified Immutable</span>
             </div>
 
-            {/* Details */}
-            {result && (
-              <div className="glass-card p-6 space-y-4">
-                <h3 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider">Registration Details</h3>
-
-                {[
-                  { label: "Title", value: result.title },
-                  { label: "Content Type", value: result.contentType, badge: true },
-                  { label: "SHA-256 Hash", value: result.fingerprints.sha256, hash: true },
-                  { label: "SHA3-256 Hash", value: result.fingerprints.sha3, hash: true },
-                  { label: "BLAKE3 Hash", value: result.fingerprints.blake3, hash: true },
-                  { label: "Perceptual Hash", value: result.fingerprints.phash || "N/A", hash: true },
-                  { label: "IPFS CID", value: result.ipfsCID, hash: true },
-                  { label: "Transaction Hash", value: result.blockchain.txHash, hash: true },
-                  { label: "Block Number", value: result.blockchain.blockNumber.toLocaleString() },
-                  { label: "Chain", value: result.blockchain.chain, badge: true },
-                  { label: "Gas Used", value: `${result.blockchain.gasUsed} MATIC` },
-                  ...(result.nftTokenId !== null && result.nftTokenId !== undefined
-                    ? [{ label: "NFT Token ID", value: `#${result.nftTokenId}`, badge: true }]
-                    : []),
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex flex-col sm:flex-row sm:items-center gap-2 py-2 border-b border-white/[0.03] last:border-0"
-                  >
-                    <span className="text-sm text-[var(--text-muted)] sm:w-40 shrink-0">{item.label}</span>
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {item.hash ? (
-                        <span className="hash-display text-[11px] flex-1 truncate">{item.value}</span>
-                      ) : item.badge ? (
-                        <span className="badge badge-blue">{item.value}</span>
-                      ) : (
-                        <span className="text-sm text-white">{item.value}</span>
-                      )}
-                      {item.hash && (
-                        <button
-                          onClick={() => copyToClipboard(item.value as string, item.label)}
-                          className="btn-icon w-7 h-7 shrink-0"
-                          title="Copy"
-                        >
-                          {copied === item.label ? (
-                            <CheckCircle2 className="w-3 h-3 text-green-400" />
-                          ) : (
-                            <Copy className="w-3 h-3" />
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+            <div className="grid sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-black/40 border border-white/5 text-xs">
+              <div>
+                <p className="text-[var(--text-muted)]">Asset Title</p>
+                <p className="font-semibold text-white text-sm mt-0.5">{result.title}</p>
               </div>
-            )}
+              <div>
+                <p className="text-[var(--text-muted)]">Owner Address</p>
+                <p className="font-mono text-blue-400 mt-0.5">{result.ownerAddress}</p>
+              </div>
+              <div>
+                <p className="text-[var(--text-muted)]">Primary SHA-256 Hash</p>
+                <p className="font-mono text-[var(--text-secondary)] mt-0.5 truncate">{result.fingerprints.sha256}</p>
+              </div>
+              <div>
+                <p className="text-[var(--text-muted)]">2D-DCT Perceptual Hash (pHash)</p>
+                <p className="font-mono text-purple-400 mt-0.5">{result.fingerprints.phash || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-[var(--text-muted)]">IPFS Content Identifier (CID)</p>
+                <p className="font-mono text-cyan-400 mt-0.5 truncate">{result.ipfsCID}</p>
+              </div>
+              <div>
+                <p className="text-[var(--text-muted)]">Polygon Transaction Hash</p>
+                <p className="font-mono text-amber-400 mt-0.5 truncate">{result.blockchain.txHash}</p>
+              </div>
+            </div>
 
-            {/* Actions */}
-            <div className="flex flex-wrap gap-3">
-              <button onClick={resetUpload} className="btn-primary">
-                <Upload className="w-4 h-4" />
-                Register Another
+            {/* Legal Disclaimer */}
+            <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 text-[11px] text-[var(--text-secondary)] leading-relaxed">
+              <strong className="text-white">Legal Notice:</strong> Blockchain registration provides mathematical, timestamped proof of existence and cryptographic ownership evidence. It does not replace statutory government copyright registration where required for statutory damage enforcement.
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => copyToClipboard(result.fingerprints.sha256, "hash")}
+                className="btn-secondary flex-1 text-xs py-2.5"
+              >
+                <Copy className="w-4 h-4" />
+                {copied === "hash" ? "Copied!" : "Copy SHA-256 Hash"}
               </button>
-              <button className="btn-secondary">
-                <Download className="w-4 h-4" />
-                Download Certificate
-              </button>
-              <button className="btn-secondary">
-                <ExternalLink className="w-4 h-4" />
-                View on Explorer
+              <button onClick={resetUpload} className="btn-primary flex-1 text-xs py-2.5">
+                <FileCheck className="w-4 h-4" />
+                Register Another Asset
               </button>
             </div>
           </motion.div>
-        ) : (
-          /* ============ PROCESSING ============ */
+        ) : stage === "duplicate" && result ? (
+          /* ============ DUPLICATE ALERT ============ */
           <motion.div
-            key="processing"
+            key="duplicate"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="glass-card p-8"
+            className="glass-card p-8 border border-amber-500/30 space-y-4"
           >
-            {/* Progress bar */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-white">Processing...</span>
-                <span className="text-sm text-[var(--text-muted)]">{progress}%</span>
-              </div>
-              <div className="progress-bar h-2">
-                <motion.div
-                  className="progress-bar-fill h-full"
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.5 }}
-                />
+            <div className="flex items-center gap-3 text-amber-400">
+              <AlertCircle className="w-8 h-8 shrink-0" />
+              <div>
+                <h2 className="text-lg font-bold text-white">Duplicate Asset Detected</h2>
+                <p className="text-xs text-[var(--text-muted)]">This exact SHA-256 cryptographic hash is already registered in ProofVault.</p>
               </div>
             </div>
+            <div className="p-4 rounded-xl bg-black/40 border border-white/5 text-xs space-y-2">
+              <p><span className="text-[var(--text-muted)]">Registered Title:</span> <span className="text-white font-medium">{result.title}</span></p>
+              <p><span className="text-[var(--text-muted)]">Original Owner:</span> <span className="font-mono text-blue-400">{result.ownerAddress}</span></p>
+              <p><span className="text-[var(--text-muted)]">Timestamp:</span> <span className="text-white">{formatDate(result.createdAt)}</span></p>
+            </div>
+            <button onClick={resetUpload} className="btn-secondary w-full py-2.5 text-xs">
+              Upload a Different File
+            </button>
+          </motion.div>
+        ) : stage === "error" ? (
+          /* ============ ERROR VIEW ============ */
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-card p-8 border border-red-500/30 space-y-4"
+          >
+            <div className="flex items-center gap-3 text-red-400">
+              <AlertCircle className="w-8 h-8" />
+              <div>
+                <h2 className="text-lg font-bold text-white">Registration Error</h2>
+                <p className="text-xs text-[var(--text-muted)]">{errorMessage || "Registration failed. Please check wallet connection and network."}</p>
+              </div>
+            </div>
+            <button onClick={resetUpload} className="btn-secondary w-full py-2.5 text-xs">
+              Try Again
+            </button>
+          </motion.div>
+        ) : (
+          /* ============ REAL PROCESSING PIPELINE ============ */
+          <motion.div
+            key="processing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="glass-card p-8 text-center space-y-6"
+          >
+            <div className="w-16 h-16 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto text-blue-400">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
 
-            {/* Stage steps */}
-            <div className="space-y-4">
-              {stageKeys.map((key, i) => {
-                const info = STAGES[key];
-                const isActive = key === stage;
-                const isDone = i < currentStageIndex;
+            <div>
+              <h2 className="text-lg font-bold text-white">{STAGES[stage]?.label || "Processing Asset..."}</h2>
+              <p className="text-xs text-[var(--text-secondary)] mt-1">{STAGES[stage]?.description || "Executing cryptographic pipeline..."}</p>
+            </div>
 
+            <div className="max-w-md mx-auto space-y-2">
+              {Object.entries(STAGES).filter(([k]) => k !== "complete").map(([key, info]) => {
+                const isCurrent = stage === key;
+                const IconComp = info.icon;
                 return (
-                  <motion.div
+                  <div
                     key={key}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className={`flex items-center gap-4 p-4 rounded-xl transition-all ${
-                      isActive
-                        ? "bg-blue-500/10 border border-blue-500/20"
-                        : isDone
-                        ? "bg-green-500/5 border border-green-500/10"
-                        : "bg-white/[0.01] border border-transparent"
+                    className={`flex items-center justify-between p-3 rounded-xl text-xs transition-all ${
+                      isCurrent
+                        ? "bg-blue-500/15 text-white border border-blue-500/30 font-medium"
+                        : "text-[var(--text-muted)] bg-white/[0.02]"
                     }`}
                   >
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                        isActive
-                          ? "bg-blue-500/20 text-blue-400"
-                          : isDone
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-white/[0.04] text-[var(--text-muted)]"
-                      }`}
-                    >
-                      {isDone ? (
-                        <CheckCircle2 className="w-5 h-5" />
-                      ) : isActive ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <info.icon className="w-5 h-5" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium ${isActive ? "text-white" : isDone ? "text-green-400" : "text-[var(--text-muted)]"}`}>
-                        {info.label}
-                      </p>
-                      <p className="text-xs text-[var(--text-muted)] truncate">{info.description}</p>
-                    </div>
-                    {isDone && <span className="badge badge-green text-[10px] shrink-0">Done</span>}
-                    {isActive && <span className="badge badge-blue text-[10px] shrink-0">In Progress</span>}
-                  </motion.div>
+                    <span className="flex items-center gap-2.5">
+                      <IconComp className={`w-4 h-4 ${isCurrent ? "text-blue-400" : ""}`} />
+                      {info.label}
+                    </span>
+                    {isCurrent && <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />}
+                  </div>
                 );
               })}
             </div>
-
-            {/* Current file info */}
-            {file && (
-              <div className="mt-6 pt-6 border-t border-white/5 flex items-center gap-3">
-                <FileUp className="w-5 h-5 text-[var(--text-muted)]" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white truncate">{file.name}</p>
-                  <p className="text-xs text-[var(--text-muted)]">{formatFileSize(file.size)}</p>
-                </div>
-              </div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>

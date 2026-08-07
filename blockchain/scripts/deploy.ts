@@ -13,7 +13,7 @@ async function main() {
 
   // Deploy ProofNFT
   const ProofNFT = await ethers.getContractFactory("ProofNFT");
-  const proofNFT = await ProofNFT.deploy();
+  const proofNFT = await ProofNFT.deploy(registryAddress);
   await proofNFT.waitForDeployment();
   const proofNFTAddress = await proofNFT.getAddress();
   console.log("ProofNFT deployed to:", proofNFTAddress);

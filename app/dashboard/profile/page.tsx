@@ -20,7 +20,7 @@ import {
   Link as LinkIcon,
   Edit3,
 } from "lucide-react";
-import { getConnectedWallet, getStoredAssets, generateMockAssets, type Asset } from "../../lib/store";
+import { getConnectedWallet, getStoredAssets, type Asset } from "../../lib/store";
 import { shortenAddress, shortenHash, formatDate } from "../../lib/crypto";
 
 export default function ProfilePage() {

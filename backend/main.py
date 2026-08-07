@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 import hashlib
 import numpy as np
 
@@ -7,98 +8,154 @@ from database.vector_store import vector_store
 from models.image_model import CLIPImageEmbedder
 from models.document_model import DocumentEmbedder
 
-app = FastAPI(
-    title="ProofVault AI Inference Engine",
-    description="Real AI Pipeline for multi-modal digital asset fingerprinting and near-duplicate vector search.",
-    version="1.0.0"
-)
-
-# Enable CORS for Next.js frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Initialize Models Lazily / Global
 image_embedder = None
 doc_embedder = None
 
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     global image_embedder, doc_embedder
     try:
         image_embedder = CLIPImageEmbedder()
         doc_embedder = DocumentEmbedder()
-        print("AI Models successfully loaded into memory.")
+        print("ProofVault AI Neural Models successfully loaded into memory.")
     except Exception as e:
         print(f"Model initialization error: {e}")
+    yield
+
+app = FastAPI(
+    title="ProofVault AI Neural Inference Engine",
+    description="Production multimodal vision & document embedding engine for perceptual hashing and FAISS similarity lookup.",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Enable CORS for trusted Next.js frontend origin
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://frontend:3000"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+def process_file_embedding(contents: bytes, mime_type: str | None, filename: str | None) -> tuple[np.ndarray, int]:
+    mime = (mime_type or "").lower()
+    fname = (filename or "").lower()
+    
+    # Image content check -> 512d CLIP
+    if mime.startswith("image/") or fname.endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg")):
+        if image_embedder:
+            emb = image_embedder.extract_embedding(contents)
+            return emb, 512
+        return np.zeros(512, dtype='float32'), 512
+    
+    # Text / document / code content check -> 384d SentenceTransformers
+    is_text = mime.startswith("text/") or mime in ["application/pdf", "application/json", "application/javascript"] or fname.endswith((".txt", ".md", ".py", ".js", ".ts", ".jsx", ".tsx", ".json", ".html", ".css", ".sol", ".cpp", ".c", ".java", ".go", ".rs", ".pdf"))
+    if is_text and doc_embedder:
+        text = contents.decode("utf-8", errors="ignore")
+        if text.strip():
+            emb = doc_embedder.extract_embedding(text)
+            return emb, 384
+        return np.zeros(384, dtype='float32'), 384
+
+    # Default fallback for binary/unsupported
+    if image_embedder:
+        return image_embedder.extract_embedding(contents), 512
+    return np.zeros(512, dtype='float32'), 512
 
 @app.get("/")
+@app.get("/health")
 def read_root():
-    return {"status": "online", "service": "ProofVault AI Inference API"}
+    return {
+        "status": "healthy",
+        "service": "ProofVault AI Neural Engine",
+        "models": {
+            "clip_vit_b32": image_embedder is not None,
+            "sentence_transformers": doc_embedder is not None
+        },
+        "indexed_images": vector_store.image_index.ntotal,
+        "indexed_docs": vector_store.doc_index.ntotal
+    }
 
 @app.post("/api/v1/fingerprint")
 async def generate_fingerprint(file: UploadFile = File(...)):
-    contents = await file.read()
-    sha256_hash = hashlib.sha256(contents).hexdigest()
-    
-    mime_type = file.content_type
-    embedding = None
+    try:
+        contents = await file.read()
+        sha256_hash = hashlib.sha256(contents).hexdigest()
+        filename = file.filename or "unnamed_asset"
+        mime_type = file.content_type
 
-    if mime_type and mime_type.startswith("image/"):
-        if image_embedder:
-            embedding = image_embedder.extract_embedding(contents)
-    elif mime_type in ["text/plain", "application/pdf"]:
-        if doc_embedder:
-            text = contents.decode("utf-8", errors="ignore")
-            embedding = doc_embedder.extract_embedding(text)
+        embedding, dim = process_file_embedding(contents, mime_type, filename)
+        ai_hash = hashlib.sha256(embedding.tobytes()).hexdigest()
 
-    # Fallback to zero vector if unhandled
-    if embedding is None:
-        embedding = np.zeros(512, dtype='float32')
+        # Automatically index vector for FAISS search
+        vector_store.add_vector(embedding, filename, sha256_hash)
 
-    ai_hash = hashlib.sha256(embedding.tobytes()).hexdigest()
+        return {
+            "filename": filename,
+            "sha256": sha256_hash,
+            "aiHash": ai_hash,
+            "embeddingDimension": dim,
+            "mimeType": mime_type
+        }
+    except Exception as e:
+        print(f"Fingerprint generation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-    return {
-        "filename": file.filename,
-        "sha256": sha256_hash,
-        "aiHash": ai_hash,
-        "embeddingDimension": len(embedding),
-        "mimeType": mime_type
-    }
+@app.post("/api/v1/register_vector")
+async def register_vector(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        sha256_hash = hashlib.sha256(contents).hexdigest()
+        filename = file.filename or "unnamed_asset"
+        mime_type = file.content_type
+
+        embedding, _ = process_file_embedding(contents, mime_type, filename)
+        vector_store.add_vector(embedding, filename, sha256_hash)
+        total = vector_store.image_index.ntotal + vector_store.doc_index.ntotal
+        return {"status": "indexed", "sha256": sha256_hash, "totalIndexed": total}
+    except Exception as e:
+        print(f"Register vector error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/v1/similarity")
 async def check_similarity(file: UploadFile = File(...)):
-    contents = await file.read()
-    mime_type = file.content_type
-    
-    if mime_type and mime_type.startswith("image/") and image_embedder:
-        embedding = image_embedder.extract_embedding(contents)
-    elif doc_embedder:
-        text = contents.decode("utf-8", errors="ignore")
-        embedding = doc_embedder.extract_embedding(text)
-    else:
-        embedding = np.zeros(512, dtype='float32')
+    try:
+        contents = await file.read()
+        filename = file.filename or "unnamed_asset"
+        mime_type = file.content_type
+        sha256_hash = hashlib.sha256(contents).hexdigest()
 
-    matches = vector_store.search(embedding, top_k=3)
-    
-    if not matches:
-        return {"result": "no_match", "similarity": 0.0, "topMatches": []}
-    
-    best_score = matches[0]["score"]
-    
-    if best_score > 0.98:
-        result_type = "exact_match"
-    elif best_score > 0.85:
-        result_type = "near_match"
-    else:
-        result_type = "no_match"
+        embedding, _ = process_file_embedding(contents, mime_type, filename)
+        matches = vector_store.search(embedding, top_k=5)
+        
+        if not matches:
+            return {
+                "result": "no_match",
+                "sha256": sha256_hash,
+                "similarity": 0.0,
+                "topMatches": []
+            }
+        
+        best_match = matches[0]
+        best_score = best_match["score"]
+        
+        # Exact perceptual match threshold vs near-duplicate threshold
+        if best_score >= 0.99 or best_match.get("sha256") == sha256_hash:
+            result_type = "exact_match"
+        elif best_score >= 0.80:
+            result_type = "near_match"
+        else:
+            result_type = "no_match"
 
-    return {
-        "result": result_type,
-        "similarity": round(best_score * 100, 2),
-        "topMatches": matches
-    }
+        return {
+            "result": result_type,
+            "sha256": sha256_hash,
+            "similarity": round(best_score * 100, 2),
+            "matchedAssetSha256": best_match.get("sha256"),
+            "topMatches": matches
+        }
+    except Exception as e:
+        print(f"Similarity check error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -24,7 +24,7 @@ import {
   ExternalLink,
   Zap,
 } from "lucide-react";
-import { getStoredAssets, generateMockAssets, MOCK_STATS, type Asset } from "../lib/store";
+import { getStoredAssets, MOCK_STATS, type Asset } from "../lib/store";
 import { shortenHash, shortenAddress, formatDate, formatFileSize, timeAgo } from "../lib/crypto";
 
 const CONTENT_ICONS: Record<string, typeof Image> = {

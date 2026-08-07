@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IAsset extends Document {
   title: string;
-  description: string;
+  description?: string;
   contentType: string;
   fileMetadata: {
     name: string;
@@ -11,20 +11,21 @@ export interface IAsset extends Document {
   };
   fingerprints: {
     sha256: string;
-    sha3: string;
-    blake3: string;
-    aiHash: string; // From FastAPI (CLIP/CodeBERT)
+    sha3?: string;
+    blake3?: string;
+    phash?: string;
+    aiHash?: string;
   };
   blockchain: {
-    txHash: string;
-    blockNumber: number;
-    timestamp: number;
-    chain: string;
-    gasUsed: string;
+    txHash?: string;
+    blockNumber?: number;
+    timestamp?: number;
+    chain?: string;
+    gasUsed?: string;
   };
   ipfsCID: string;
   thumbnailCID?: string;
-  nftTokenId?: number;
+  nftTokenId?: number | null;
   status: 'pending' | 'registered' | 'disputed';
   verificationCount: number;
   ownerAddress: string;
@@ -33,7 +34,7 @@ export interface IAsset extends Document {
 
 const AssetSchema = new Schema<IAsset>({
   title: { type: String, required: true },
-  description: { type: String },
+  description: { type: String, default: '' },
   contentType: { type: String, required: true },
   fileMetadata: {
     name: { type: String, required: true },
@@ -41,9 +42,10 @@ const AssetSchema = new Schema<IAsset>({
     size: { type: Number, required: true },
   },
   fingerprints: {
-    sha256: { type: String, required: true, unique: true },
+    sha256: { type: String, required: true },
     sha3: { type: String },
     blake3: { type: String },
+    phash: { type: String },
     aiHash: { type: String },
   },
   blockchain: {
@@ -53,13 +55,16 @@ const AssetSchema = new Schema<IAsset>({
     chain: { type: String, default: 'Polygon Amoy' },
     gasUsed: { type: String },
   },
-  ipfsCID: { type: String },
+  ipfsCID: { type: String, required: true },
   thumbnailCID: { type: String },
-  nftTokenId: { type: Number },
-  status: { type: String, enum: ['pending', 'registered', 'disputed'], default: 'pending' },
+  nftTokenId: { type: Number, default: null },
+  status: { type: String, enum: ['pending', 'registered', 'disputed'], default: 'registered' },
   verificationCount: { type: Number, default: 0 },
   ownerAddress: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
+
+AssetSchema.index({ "fingerprints.sha256": 1 }, { unique: true });
+AssetSchema.index({ ownerAddress: 1, createdAt: -1 });
 
 export const Asset = mongoose.models.Asset || mongoose.model<IAsset>('Asset', AssetSchema);
