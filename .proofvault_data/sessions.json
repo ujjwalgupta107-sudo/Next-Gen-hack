@@ -1,0 +1,30 @@
+[
+  {
+    "userId": "local_user_1786128734923_hmo2m",
+    "refreshTokenHash": "becc54b37391deaf64203004a7700bf6bddfe0231a7ffd5a1724b3724cf87a58",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T18:52:14.933Z",
+    "lastUsedAt": "2026-08-07T18:52:17.437Z"
+  },
+  {
+    "userId": "local_user_1786128734923_hmo2m",
+    "refreshTokenHash": "ec38222058d74e887b930e074c3209fd780927b0c01712780ca334241d9ee84d",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T18:52:22.669Z",
+    "lastUsedAt": "2026-08-07T18:52:25.173Z"
+  },
+  {
+    "userId": "local_user_1786128750221_ujqf2",
+    "refreshTokenHash": "ea4cdd02e39d887b6dc3a2135deec2d2003902a8696ef926b720dc9ea8583c17",
+    "walletAddress": "0xfa23d30df24fab7125acff9751f9aeb059838b01",
+    "userAgent": "",
+    "ipAddress": "127.0.0.1",
+    "isValid": true,
+    "expiresAt": "2026-09-06T18:52:30.222Z",
+    "lastUsedAt": "2026-08-07T18:52:32.728Z"
+  }
+]

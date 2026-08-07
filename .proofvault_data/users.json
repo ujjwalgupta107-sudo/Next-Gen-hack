@@ -1,0 +1,28 @@
+[
+  {
+    "id": "local_user_1786128734923_hmo2m",
+    "username": "creator_2189",
+    "fullName": "Ujjwal Gupta",
+    "email": "ujjwal_2189@proofvault.ai",
+    "passwordHash": "$2b$12$2q9YZ3Y4ae74HzXFtkkbr.IKKeuj14OOmFqaBQocEjCNoZIVeoikq",
+    "role": "creator",
+    "reputationScore": 100,
+    "verified": false,
+    "emailVerificationToken": "d175235b290e8ac7e0a945dcab975aa8eb0da44f63df1265197ec88c3e94943a",
+    "createdAt": "2026-08-07T18:52:14.923Z",
+    "updatedAt": "2026-08-07T18:52:14.924Z",
+    "lastLogin": "2026-08-07T18:52:25.173Z"
+  },
+  {
+    "id": "local_user_1786128750221_ujqf2",
+    "username": "creator_fa23d3",
+    "fullName": "Creator 0xfa23...8b01",
+    "walletAddress": "0xfa23d30df24fab7125acff9751f9aeb059838b01",
+    "role": "creator",
+    "reputationScore": 100,
+    "verified": true,
+    "createdAt": "2026-08-07T18:52:30.221Z",
+    "updatedAt": "2026-08-07T18:52:30.221Z",
+    "lastLogin": "2026-08-07T18:52:32.729Z"
+  }
+]

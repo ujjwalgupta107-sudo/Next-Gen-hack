@@ -1,0 +1,20 @@
+[
+  {
+    "userId": "local_user_1786128734923_hmo2m",
+    "action": "login",
+    "description": "User creator_2189 logged in via credentials",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "",
+    "metadata": {},
+    "timestamp": "2026-08-07T18:52:27.679Z"
+  },
+  {
+    "userId": "local_user_1786128734923_hmo2m",
+    "action": "signup",
+    "description": "User creator_2189 registered with email",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "",
+    "metadata": {},
+    "timestamp": "2026-08-07T18:52:19.943Z"
+  }
+]
