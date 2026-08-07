@@ -2,22 +2,16 @@ import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/proofvault";
 
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
-}
-
 /**
- * Global is used here to maintain a cached connection across hot reloads
- * in development. This prevents connections growing exponentially
- * during API Route usage.
+ * Global cached connection across hot-reloads.
  */
 let cached = (global as any).mongoose;
 
 if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+  cached = (global as any).mongoose = { conn: null, promise: null, isOffline: false };
 }
 
-async function connectToDatabase() {
+export async function connectToDatabase(): Promise<typeof mongoose | null> {
   if (cached.conn) {
     return cached.conn;
   }
@@ -25,23 +19,31 @@ async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 2500, // Short timeout for graceful fallback
+      connectTimeoutMS: 2500,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).catch((err) => {
-      cached.promise = null;
-      throw err;
-    });
+    cached.promise = mongoose.connect(MONGODB_URI, opts)
+      .then((mongooseInstance) => {
+        cached.isOffline = false;
+        return mongooseInstance;
+      })
+      .catch((err) => {
+        console.warn(`[ProofVault DB] MongoDB offline (${err.message}). Activating resilient local storage.`);
+        cached.isOffline = true;
+        cached.promise = null;
+        return null;
+      });
   }
 
   try {
     cached.conn = await cached.promise;
-  } catch (e) {
+  } catch {
     cached.promise = null;
-    throw e;
+    cached.conn = null;
   }
 
   return cached.conn;
 }
 
 export default connectToDatabase;
-
