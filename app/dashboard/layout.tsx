@@ -25,7 +25,7 @@ import {
   X,
 } from "lucide-react";
 import { shortenAddress } from "../lib/crypto";
-import { getConnectedWallet, connectWallet } from "../lib/store";
+import { useAuth } from "../lib/auth-context";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -49,28 +49,17 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { user, currentWallet, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [wallet, setWallet] = useState<string | null>(null);
   const [notifications, setNotifications] = useState(3);
 
-  useEffect(() => {
-    async function initWallet() {
-      const w = await getConnectedWallet();
-      setWallet(w || "0x71C7656EC7ab88b098defB751B7401B5f6d8976F");
-    }
-    initWallet();
-  }, []);
+  const displayWallet = user?.walletAddress || currentWallet || "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
 
-  const handleConnect = async () => {
-    const w = await connectWallet();
-    if (w) setWallet(w);
+  const handleDisconnect = async () => {
+    await logout();
   };
 
-  const handleDisconnect = () => {
-    setWallet(null);
-    window.location.href = "/";
-  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-primary)]">
@@ -263,17 +252,17 @@ export default function DashboardLayout({
               )}
             </button>
 
-            {/* Wallet */}
+            {/* Wallet / User Info */}
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.06]">
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
               <span className="text-xs sm:text-sm font-mono text-[var(--text-secondary)] hidden sm:inline">
-                {wallet ? shortenAddress(wallet) : "Not connected"}
+                {user?.username ? `@${user.username}` : shortenAddress(displayWallet)}
               </span>
               <Wallet className="w-4 h-4 text-[var(--text-muted)] sm:hidden" />
             </div>
 
             {/* Logout */}
-            <button onClick={handleDisconnect} className="btn-icon" title="Disconnect">
+            <button onClick={handleDisconnect} className="btn-icon" title="Sign Out">
               <LogOut className="w-4 h-4" />
             </button>
           </div>

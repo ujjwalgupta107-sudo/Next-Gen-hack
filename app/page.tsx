@@ -197,12 +197,15 @@ function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="btn-secondary text-sm no-underline hidden sm:flex">
-            Launch App
+          <Link href="/auth/login" className="text-xs text-slate-300 hover:text-white font-medium px-3 py-1.5 rounded-lg hover:bg-white/5 transition no-underline">
+            Sign In
           </Link>
-          <Link href="/dashboard" className="btn-primary text-sm no-underline">
-            <Wallet className="w-4 h-4" />
-            Connect Wallet
+          <Link href="/auth/signup" className="text-xs text-cyan-400 border border-cyan-500/30 hover:border-cyan-500 hover:bg-cyan-500/10 font-medium px-3 py-1.5 rounded-lg transition no-underline">
+            Sign Up
+          </Link>
+          <Link href="/dashboard" className="btn-primary text-xs no-underline">
+            <Wallet className="w-3.5 h-3.5" />
+            Launch App
           </Link>
           <button
             className="md:hidden btn-icon"

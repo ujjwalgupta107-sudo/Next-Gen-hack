@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import hashlib
@@ -7,6 +7,9 @@ import numpy as np
 from database.vector_store import vector_store
 from models.image_model import CLIPImageEmbedder
 from models.document_model import DocumentEmbedder
+from schemas.user_schema import UserRegisterRequest, UserLoginRequest, SIWELoginRequest, TokenResponse
+from services.auth_service import hash_password, verify_password, create_access_token, decode_access_token
+from middleware.auth_middleware import get_current_user, RequireRole, rate_limiter
 
 # Initialize Models Lazily / Global
 image_embedder = None
@@ -25,7 +28,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="ProofVault AI Neural Inference Engine",
-    description="Production multimodal vision & document embedding engine for perceptual hashing and FAISS similarity lookup.",
+    description="Production multimodal vision & document embedding engine for perceptual hashing, FAISS similarity lookup, and RBAC authentication.",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -33,9 +36,9 @@ app = FastAPI(
 # Enable CORS for trusted Next.js frontend origin
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://frontend:3000"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://frontend:3000", "*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -78,8 +81,17 @@ def read_root():
         "indexed_docs": vector_store.doc_index.ntotal
     }
 
+@app.post("/api/v1/auth/verify_token")
+async def verify_token_endpoint(user: dict = Depends(get_current_user)):
+    """Validates JWT bearer token and returns decoded identity."""
+    return {"valid": True, "user": user}
+
 @app.post("/api/v1/fingerprint")
-async def generate_fingerprint(file: UploadFile = File(...)):
+async def generate_fingerprint(
+    request: Request,
+    file: UploadFile = File(...)
+):
+    await rate_limiter.check_rate_limit(request)
     try:
         contents = await file.read()
         sha256_hash = hashlib.sha256(contents).hexdigest()
@@ -99,12 +111,18 @@ async def generate_fingerprint(file: UploadFile = File(...)):
             "embeddingDimension": dim,
             "mimeType": mime_type
         }
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Fingerprint generation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/v1/register_vector")
-async def register_vector(file: UploadFile = File(...)):
+async def register_vector(
+    request: Request,
+    file: UploadFile = File(...)
+):
+    await rate_limiter.check_rate_limit(request)
     try:
         contents = await file.read()
         sha256_hash = hashlib.sha256(contents).hexdigest()
@@ -115,12 +133,18 @@ async def register_vector(file: UploadFile = File(...)):
         vector_store.add_vector(embedding, filename, sha256_hash)
         total = vector_store.image_index.ntotal + vector_store.doc_index.ntotal
         return {"status": "indexed", "sha256": sha256_hash, "totalIndexed": total}
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Register vector error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/v1/similarity")
-async def check_similarity(file: UploadFile = File(...)):
+async def check_similarity(
+    request: Request,
+    file: UploadFile = File(...)
+):
+    await rate_limiter.check_rate_limit(request)
     try:
         contents = await file.read()
         filename = file.filename or "unnamed_asset"
@@ -156,6 +180,8 @@ async def check_similarity(file: UploadFile = File(...)):
             "matchedAssetSha256": best_match.get("sha256"),
             "topMatches": matches
         }
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Similarity check error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
