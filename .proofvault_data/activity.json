@@ -6,6 +6,15 @@
     "ipAddress": "::1",
     "userAgent": "python-requests/2.34.2",
     "metadata": {},
+    "timestamp": "2026-08-08T14:35:11.072Z"
+  },
+  {
+    "userId": "local_user_1786197691154_gi0fh",
+    "action": "login",
+    "description": "User proofvaultdemo logged in via credentials",
+    "ipAddress": "::1",
+    "userAgent": "python-requests/2.34.2",
+    "metadata": {},
     "timestamp": "2026-08-08T14:10:32.234Z"
   },
   {

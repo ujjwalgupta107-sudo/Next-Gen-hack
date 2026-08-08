@@ -202,5 +202,14 @@
     "isValid": true,
     "expiresAt": "2026-09-07T14:10:27.209Z",
     "lastUsedAt": "2026-08-08T14:10:29.720Z"
+  },
+  {
+    "userId": "local_user_1786197691154_gi0fh",
+    "refreshTokenHash": "019747be7c834e9da3ca1a06d116b67a2ce1519bcba08558b5fcb143292e0c66",
+    "userAgent": "python-requests/2.34.2",
+    "ipAddress": "::1",
+    "isValid": true,
+    "expiresAt": "2026-09-07T14:35:06.062Z",
+    "lastUsedAt": "2026-08-08T14:35:08.566Z"
   }
 ]
