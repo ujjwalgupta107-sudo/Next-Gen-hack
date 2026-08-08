@@ -22,7 +22,7 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: NODE_OPTIONS="--max-old-space-size=450" npm install && npm run build
+    buildCommand: NODE_OPTIONS="--max-old-space-size=450" npm install --include=dev && npm run build
     startCommand: npx next start -H 0.0.0.0 -p $PORT
     autoDeploy: true
     envVars:
