@@ -18,7 +18,7 @@ services:
 
   # 2. Next.js 16 Production Frontend Application
   - type: web
-    name: proofvault-frontend
+    name: proofvault-ai
     runtime: node
     plan: free
     region: oregon
