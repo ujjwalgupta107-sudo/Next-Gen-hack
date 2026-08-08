@@ -1,0 +1,52 @@
+services:
+  # 1. FastAPI Neural AI Inference Backend Microservice
+  - type: web
+    name: proofvault-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    region: oregon
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: JWT_SECRET
+        generateValue: true
+
+  # 2. Next.js 16 Production Frontend Application
+  - type: web
+    name: proofvault-frontend
+    runtime: node
+    rootDir: .
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_FASTAPI_URL
+        fromService:
+          type: web
+          name: proofvault-backend
+          property: host
+      - key: JWT_SECRET
+        fromService:
+          type: web
+          name: proofvault-backend
+          property: envVar
+          envVarKey: JWT_SECRET
+      - key: NEXT_PUBLIC_GATEWAY_URL
+        value: gateway.pinata.cloud
+      - key: AMOY_RPC_URL
+        value: https://rpc-amoy.polygon.technology
+      - key: NEXT_PUBLIC_REGISTRY_ADDRESS
+        value: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      - key: NEXT_PUBLIC_PROOF_NFT_ADDRESS
+        value: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      - key: NEXT_PUBLIC_LICENSING_ADDRESS
+        value: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"

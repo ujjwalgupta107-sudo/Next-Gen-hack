@@ -1,0 +1,10 @@
+# Vercel Deployment Ignore
+# Exclude heavy backend AI models & dependencies so build stays < 20MB (Vercel limit is 500MB)
+backend/
+blockchain/
+vector_data/
+*.bin
+*.pt
+*.onnx
+.proofvault_data/
+scripts/
