@@ -1,0 +1,18 @@
+[
+  {
+    "_id": "verif_1786198879871_w37b0",
+    "uploadedHash": "86c681015b8e54f59a9bf82c155fc752c5c86a7c8ffc945678858ec1eeaffae1",
+    "result": "exact_match",
+    "matchedAssetId": "asset_1786198749809_jdbce",
+    "similarityScore": 100,
+    "timestamp": "2026-08-08T14:21:19.871Z"
+  },
+  {
+    "_id": "verif_1786198807736_wyzli",
+    "uploadedHash": "86c681015b8e54f59a9bf82c155fc752c5c86a7c8ffc945678858ec1eeaffae1",
+    "result": "exact_match",
+    "matchedAssetId": "asset_1786198749809_jdbce",
+    "similarityScore": 100,
+    "timestamp": "2026-08-08T14:20:07.736Z"
+  }
+]

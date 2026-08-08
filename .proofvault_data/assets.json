@@ -1,0 +1,34 @@
+[
+  {
+    "_id": "asset_1786198749809_jdbce",
+    "id": "asset_1786198749809_nx9mv",
+    "title": "test upload asset",
+    "description": "",
+    "contentType": "image",
+    "fileMetadata": {
+      "name": "test_upload_asset.png",
+      "mimeType": "image/png",
+      "size": 2632
+    },
+    "fingerprints": {
+      "sha256": "86c681015b8e54f59a9bf82c155fc752c5c86a7c8ffc945678858ec1eeaffae1",
+      "sha3": "8b307c6f107701d4d2b61763658b56034b6136f2068a959731183a75caeafb27",
+      "blake3": "62343aa98525b3746dd11af1d9799d5930b3656084e3b91d0d67507d25c5b951",
+      "phash": "983365ce9e395966",
+      "aiHash": "e8adb8cab5429a68b1e21cdb120c227ad55ca53f34a1ea25a1e204e6ab64dace"
+    },
+    "ipfsCID": "Qm86c681015b8e54f59a9bf82c155fc752c5c86a7c8ffc",
+    "ownerAddress": "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+    "blockchain": {
+      "txHash": "0xd55fa26656c6f9668c27d5cb33502b38",
+      "blockNumber": 48520204,
+      "timestamp": 1786198747198,
+      "chain": "Polygon Amoy",
+      "gasUsed": "42150"
+    },
+    "status": "registered",
+    "verificationCount": 0,
+    "createdAt": "2026-08-08T14:19:09.809Z",
+    "updatedAt": "2026-08-08T14:19:09.809Z"
+  }
+]

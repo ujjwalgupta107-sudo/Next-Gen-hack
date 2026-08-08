@@ -158,5 +158,19 @@
     "createdAt": "2026-08-07T19:33:44.838Z",
     "updatedAt": "2026-08-07T19:33:44.838Z",
     "lastLogin": "2026-08-07T19:33:47.351Z"
+  },
+  {
+    "id": "local_user_1786197691154_gi0fh",
+    "username": "proofvaultdemo",
+    "fullName": "ProofVault Demo User",
+    "email": "proofvault.demo@test.local",
+    "passwordHash": "$2b$12$qe19OsqP9yhV3DEc20xUwe.bcKxZv3Q2ubvKZDbTzS41uP4mPERfa",
+    "role": "creator",
+    "reputationScore": 100,
+    "verified": false,
+    "emailVerificationToken": "2bfe2fc3eb6164b6554c381db8469189f39076c9fd13a204d7b99d0c6336f3c6",
+    "createdAt": "2026-08-08T14:01:31.154Z",
+    "updatedAt": "2026-08-08T14:01:31.154Z",
+    "lastLogin": "2026-08-08T14:10:29.721Z"
   }
 ]

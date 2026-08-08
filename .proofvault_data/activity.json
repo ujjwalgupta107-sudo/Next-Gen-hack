@@ -1,5 +1,41 @@
 [
   {
+    "userId": "local_user_1786197691154_gi0fh",
+    "action": "login",
+    "description": "User proofvaultdemo logged in via credentials",
+    "ipAddress": "::1",
+    "userAgent": "python-requests/2.34.2",
+    "metadata": {},
+    "timestamp": "2026-08-08T14:10:32.234Z"
+  },
+  {
+    "userId": "local_user_1786197691154_gi0fh",
+    "action": "login",
+    "description": "User proofvaultdemo logged in via credentials",
+    "ipAddress": "::1",
+    "userAgent": "python-requests/2.34.2",
+    "metadata": {},
+    "timestamp": "2026-08-08T14:06:39.775Z"
+  },
+  {
+    "userId": "local_user_1786197691154_gi0fh",
+    "action": "login",
+    "description": "User proofvaultdemo logged in via credentials",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "metadata": {},
+    "timestamp": "2026-08-08T14:04:37.284Z"
+  },
+  {
+    "userId": "local_user_1786197691154_gi0fh",
+    "action": "signup",
+    "description": "User proofvaultdemo registered with email",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "metadata": {},
+    "timestamp": "2026-08-08T14:01:36.220Z"
+  },
+  {
     "userId": "local_user_1786131224838_4qqal",
     "action": "signup",
     "description": "User ujjwal_107 registered with email",

@@ -1,8 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 import connectToDatabase from "@/app/lib/db";
 import { Asset } from "@/app/models/Asset";
 import { validateSIWERequest } from "@/app/lib/auth";
 import { z } from "zod";
+
+const DATA_DIR = path.join(process.cwd(), '.proofvault_data');
+const ASSETS_FILE = path.join(DATA_DIR, 'assets.json');
+
+function ensureDataDir() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+}
+
+function readLocalAssets(): any[] {
+  try {
+    ensureDataDir();
+    if (!fs.existsSync(ASSETS_FILE)) return [];
+    return JSON.parse(fs.readFileSync(ASSETS_FILE, 'utf-8'));
+  } catch {
+    return [];
+  }
+}
+
+function writeLocalAssets(data: any[]) {
+  try {
+    ensureDataDir();
+    fs.writeFileSync(ASSETS_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Failed to write local assets:', err);
+  }
+}
 
 const hashStringSchema = z.string().transform((val) => val.startsWith("0x") ? val.slice(2).toLowerCase() : val.toLowerCase()).pipe(z.string().length(64));
 
@@ -39,16 +69,26 @@ const AssetSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
-    
-    // Get owner address from query if specified
     const url = new URL(req.url);
     const owner = url.searchParams.get("owner");
+    const db = await connectToDatabase();
     
-    const query = owner ? { ownerAddress: new RegExp(`^${owner}$`, "i") } : {};
-    const assets = await Asset.find(query).sort({ createdAt: -1 });
+    if (db) {
+      try {
+        const query = owner ? { ownerAddress: new RegExp(`^${owner}$`, "i") } : {};
+        const assets = await Asset.find(query).sort({ createdAt: -1 });
+        return NextResponse.json(assets, { status: 200 });
+      } catch (err) {
+        console.warn("MongoDB fetch assets failed, reading local store:", err);
+      }
+    }
     
-    return NextResponse.json(assets, { status: 200 });
+    // Resilient local storage fallback
+    const local = readLocalAssets();
+    const filtered = owner 
+      ? local.filter((a) => a.ownerAddress?.toLowerCase() === owner.toLowerCase())
+      : local;
+    return NextResponse.json(filtered, { status: 200 });
   } catch (error) {
     console.error("Fetch assets error:", error);
     return NextResponse.json({ error: "Failed to fetch assets" }, { status: 500 });
@@ -57,7 +97,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const data = await req.json();
     
     const parsed = AssetSchema.safeParse(data);
@@ -71,16 +110,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized: Invalid or missing SIWE signature", details: authCheck.error }, { status: 401 });
     }
 
-    // Check for duplicate asset hash
-    const existing = await Asset.findOne({ "fingerprints.sha256": parsed.data.fingerprints.sha256 });
-    if (existing) {
-      return NextResponse.json(existing, { status: 200 });
+    const db = await connectToDatabase();
+    if (db) {
+      try {
+        // Check for duplicate asset hash
+        const existing = await Asset.findOne({ "fingerprints.sha256": parsed.data.fingerprints.sha256 });
+        if (existing) {
+          return NextResponse.json(existing, { status: 200 });
+        }
+        
+        const newAsset = new Asset(parsed.data);
+        await newAsset.save();
+        
+        return NextResponse.json(newAsset, { status: 201 });
+      } catch (err) {
+        console.warn("MongoDB create asset failed, writing to local store:", err);
+      }
     }
-    
-    const newAsset = new Asset(parsed.data);
-    await newAsset.save();
-    
-    return NextResponse.json(newAsset, { status: 201 });
+
+    // Resilient local storage fallback
+    const local = readLocalAssets();
+    const existingIdx = local.findIndex((a) => a.fingerprints?.sha256 === parsed.data.fingerprints.sha256);
+    if (existingIdx !== -1) {
+      return NextResponse.json(local[existingIdx], { status: 200 });
+    }
+
+    const newLocalAsset = {
+      _id: `asset_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: `asset_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      ...parsed.data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    local.unshift(newLocalAsset);
+    writeLocalAssets(local);
+
+    return NextResponse.json(newLocalAsset, { status: 201 });
   } catch (error) {
     console.error("Create asset error:", error);
     return NextResponse.json({ error: "Failed to create asset" }, { status: 500 });

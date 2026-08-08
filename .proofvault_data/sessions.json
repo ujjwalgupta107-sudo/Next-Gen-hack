@@ -166,5 +166,41 @@
     "isValid": false,
     "expiresAt": "2026-09-06T19:33:44.842Z",
     "lastUsedAt": "2026-08-07T19:33:47.350Z"
+  },
+  {
+    "userId": "local_user_1786197691154_gi0fh",
+    "refreshTokenHash": "9d854cb4a9292459c7ae489a15a878f8aa62548aa4e6054b63e06718742d72b9",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "ipAddress": "::1",
+    "isValid": false,
+    "expiresAt": "2026-09-07T14:01:31.171Z",
+    "lastUsedAt": "2026-08-08T14:01:33.702Z"
+  },
+  {
+    "userId": "local_user_1786197691154_gi0fh",
+    "refreshTokenHash": "782562a6b7d4ade1088c57e3a6df2c8a81d3998685da6ffa5009cc060626bd17",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "ipAddress": "::1",
+    "isValid": true,
+    "expiresAt": "2026-09-07T14:04:32.250Z",
+    "lastUsedAt": "2026-08-08T14:04:34.765Z"
+  },
+  {
+    "userId": "local_user_1786197691154_gi0fh",
+    "refreshTokenHash": "ba352e35a129e2ce489f309b9cf685ab3f18e74e4423e177225696ec44c70888",
+    "userAgent": "python-requests/2.34.2",
+    "ipAddress": "::1",
+    "isValid": true,
+    "expiresAt": "2026-09-07T14:06:34.763Z",
+    "lastUsedAt": "2026-08-08T14:06:37.269Z"
+  },
+  {
+    "userId": "local_user_1786197691154_gi0fh",
+    "refreshTokenHash": "a88ffa1efbcce66c103f682687f96a3b64cb11daf2c4172cfb64d8dfcda96def",
+    "userAgent": "python-requests/2.34.2",
+    "ipAddress": "::1",
+    "isValid": true,
+    "expiresAt": "2026-09-07T14:10:27.209Z",
+    "lastUsedAt": "2026-08-08T14:10:29.720Z"
   }
 ]
