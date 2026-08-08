@@ -1,18 +1,33 @@
 services:
-  # 1. Next.js 16 Production Frontend Application
+  # 1. FastAPI Neural AI Inference Backend Microservice
+  - type: web
+    name: proofvault-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    region: oregon
+    buildCommand: pip install --no-cache-dir -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: JWT_SECRET
+        generateValue: true
+
+  # 2. Next.js 16 Production Frontend Application
   - type: web
     name: proofvault-frontend
     runtime: node
     plan: free
     region: oregon
-    buildCommand: npm install && npm run build
+    buildCommand: NODE_OPTIONS="--max-old-space-size=450" npm install && npm run build
     startCommand: npx next start -H 0.0.0.0 -p $PORT
     autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
-      - key: JWT_SECRET
-        generateValue: true
       - key: NEXT_PUBLIC_GATEWAY_URL
         value: gateway.pinata.cloud
       - key: AMOY_RPC_URL
@@ -25,20 +40,3 @@ services:
         value: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
       - key: NEXT_PUBLIC_FASTAPI_URL
         value: "http://localhost:8000"
-
-  # 2. FastAPI Neural AI Inference Backend Microservice
-  - type: web
-    name: proofvault-backend
-    runtime: python
-    rootDir: backend
-    plan: free
-    region: oregon
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /health
-    autoDeploy: true
-    envVars:
-      - key: PYTHONUNBUFFERED
-        value: "1"
-      - key: JWT_SECRET
-        generateValue: true
