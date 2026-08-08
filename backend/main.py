@@ -11,26 +11,13 @@ from schemas.user_schema import UserRegisterRequest, UserLoginRequest, SIWELogin
 from services.auth_service import hash_password, verify_password, create_access_token, decode_access_token
 from middleware.auth_middleware import get_current_user, RequireRole, rate_limiter
 
-# Initialize Models Lazily / Global
-image_embedder = None
-doc_embedder = None
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global image_embedder, doc_embedder
-    try:
-        image_embedder = CLIPImageEmbedder()
-        doc_embedder = DocumentEmbedder()
-        print("ProofVault AI Neural Models successfully loaded into memory.")
-    except Exception as e:
-        print(f"Model initialization error: {e}")
-    yield
+image_embedder = CLIPImageEmbedder()
+doc_embedder = DocumentEmbedder()
 
 app = FastAPI(
     title="ProofVault AI Neural Inference Engine",
     description="Production multimodal vision & document embedding engine for perceptual hashing, FAISS similarity lookup, and RBAC authentication.",
-    version="1.0.0",
-    lifespan=lifespan
+    version="1.0.0"
 )
 
 # Enable CORS for trusted Next.js frontend origin
