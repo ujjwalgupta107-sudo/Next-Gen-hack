@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, CheckCircle2, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
+import { Shield, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -43,48 +43,54 @@ function VerifyEmailContent() {
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-tr from-green-500/15 via-cyan-500/15 to-transparent blur-[120px] rounded-full pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+      <div className="light-ambient-glow w-[500px] h-[350px] bg-green-200/30 top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute inset-0 light-grid-pattern opacity-40 pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3 group mb-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 p-[2px] shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-cyan-400" />
-              </div>
+          <Link href="/" className="inline-flex items-center gap-2.5 group mb-3 no-underline">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-xs group-hover:bg-indigo-700 transition-colors">
+              <Shield className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
-              ProofVault <span className="text-cyan-400">AI</span>
+            <span className="font-bold text-2xl tracking-tight text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Proof<span className="text-indigo-600">Vault</span> AI
             </span>
           </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Email Verification</h1>
-          <p className="text-sm text-slate-400 mt-1">Activate your cryptographic creator identity</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Email Verification
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            Activate your cryptographic creator identity
+          </p>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-black/50 text-center">
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 text-center">
           {status === 'verifying' && (
             <div className="space-y-4 py-6">
-              <div className="w-10 h-10 border-3 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs text-slate-300">Verifying your cryptographic token with MongoDB...</p>
+              <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mx-auto" />
+              <p className="text-xs text-slate-600">Verifying your cryptographic token with MongoDB...</p>
             </div>
           )}
 
           {status === 'success' && (
             <div className="space-y-4">
-              <div className="w-14 h-14 rounded-full bg-green-950/60 border border-green-500/50 text-green-400 flex items-center justify-center mx-auto">
+              <div className="w-14 h-14 rounded-2xl bg-green-50 border border-green-200 text-green-600 flex items-center justify-center mx-auto shadow-xs">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h2 className="text-lg font-bold text-white">Email Successfully Verified!</h2>
-              <p className="text-xs text-slate-400">
-                Your ProofVault AI account is now verified. You have full access to decentralized proof anchoring, perceptual similarity audits, and NFT minting.
+              <h2 className="text-lg font-bold text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Email Successfully Verified!
+              </h2>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Your ProofVault AI account is verified. You have full access to decentralized proof anchoring, perceptual similarity audits, and NFT minting.
               </p>
-              <div className="pt-4">
+              <div className="pt-3">
                 <Link
                   href="/dashboard"
-                  className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 transition"
+                  className="btn-primary w-full py-3 text-xs font-semibold no-underline shadow-md flex items-center justify-center gap-2"
                 >
-                  Go to Dashboard <ArrowRight className="w-4 h-4" />
+                  <span>Go to Dashboard</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
@@ -92,15 +98,17 @@ function VerifyEmailContent() {
 
           {status === 'error' && (
             <div className="space-y-4">
-              <div className="w-14 h-14 rounded-full bg-red-950/60 border border-red-500/50 text-red-400 flex items-center justify-center mx-auto">
+              <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center mx-auto shadow-xs">
                 <AlertCircle className="w-8 h-8" />
               </div>
-              <h2 className="text-lg font-bold text-white">Verification Failed</h2>
-              <p className="text-xs text-red-300">{errorMessage}</p>
-              <div className="pt-4">
+              <h2 className="text-lg font-bold text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Verification Failed
+              </h2>
+              <p className="text-xs text-red-700">{errorMessage}</p>
+              <div className="pt-3">
                 <Link
                   href="/auth/login"
-                  className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center gap-2 transition"
+                  className="btn-secondary w-full py-2.5 text-xs no-underline"
                 >
                   Back to Sign In
                 </Link>
@@ -109,25 +117,9 @@ function VerifyEmailContent() {
           )}
 
           {status === 'idle' && (
-            <form onSubmit={(e) => { e.preventDefault(); triggerVerification(token); }} className="space-y-4">
-              <p className="text-xs text-slate-400">
-                Enter your email verification token below if you did not arrive via direct confirmation link:
-              </p>
-              <input
-                type="text"
-                required
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                placeholder="Verification token"
-                className="w-full bg-slate-950/60 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-slate-600 outline-none transition"
-              />
-              <button
-                type="submit"
-                className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-cyan-500 to-blue-600 text-white flex items-center justify-center gap-2"
-              >
-                Verify Email Token <Sparkles className="w-4 h-4" />
-              </button>
-            </form>
+            <div className="py-6 text-xs text-slate-500">
+              Awaiting verification token...
+            </div>
           )}
         </div>
       </div>
@@ -137,7 +129,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center text-xs text-slate-500">Loading...</div>}>
       <VerifyEmailContent />
     </Suspense>
   );

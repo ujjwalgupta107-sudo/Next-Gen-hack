@@ -22,6 +22,8 @@ import {
   X,
   ArrowRight,
   Sparkles,
+  Globe,
+  Tag,
 } from "lucide-react";
 import {
   generateSHA256,
@@ -140,73 +142,86 @@ export default function VerifyPage() {
   const resultConfig = {
     exact_match: {
       icon: CheckCircle2,
-      title: "Exact Match Confirmed ✅",
-      subtitle: "This file is cryptographically registered and anchored on Polygon.",
+      title: "Exact Ownership Match Confirmed",
+      subtitle: "This file is cryptographically registered and anchored on Polygon Amoy.",
       badgeClass: "badge-green",
-      borderColor: "border-green-500/30",
+      badgeText: "100% Exact Match",
+      containerClass: "border-green-300 bg-white",
+      iconBg: "bg-green-50 text-green-600",
     },
     near_match: {
       icon: AlertTriangle,
-      title: "Perceptual Near-Duplicate Detected ⚠️",
-      subtitle: "A visually or semantically similar asset exists in the registry.",
+      title: "Perceptual Near-Duplicate Detected",
+      subtitle: "A visually or semantically similar asset exists in the ProofVault registry.",
       badgeClass: "badge-amber",
-      borderColor: "border-amber-500/30",
+      badgeText: `${similarity}% Perceptual Similarity`,
+      containerClass: "border-amber-300 bg-white",
+      iconBg: "bg-amber-50 text-amber-600",
     },
     no_match: {
       icon: XCircle,
-      title: "No Match in Registry ❌",
-      subtitle: "This file has not yet been registered in ProofVault AI.",
+      title: "No Match Found in Registry",
+      subtitle: "This cryptographic hash has not been anchored in ProofVault AI yet.",
       badgeClass: "badge-red",
-      borderColor: "border-red-500/30",
+      badgeText: "Unregistered",
+      containerClass: "border-slate-200 bg-white",
+      iconBg: "bg-slate-100 text-slate-500",
     },
   };
-
-  const activeResult = resultConfig[matchType];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          <Search className="w-6 h-6 text-purple-400" />
-          Verify Digital Asset & Similarity Search
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <Search className="w-4 h-4" />
+          </div>
+          <span>Digital IP Verification Center</span>
         </h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Perform instantaneous multi-modal verification: exact SHA-256 validation & FAISS neural vector similarity.
+        <p className="text-xs sm:text-sm text-slate-600 mt-1.5">
+          Audit digital assets against the Polygon ledger and neural vector registry with instant cryptographic verification.
         </p>
       </div>
 
       <AnimatePresence mode="wait">
         {stage === "idle" ? (
-          /* ============ INPUT VIEW ============ */
+          /* ============ VERIFICATION INPUT ============ */
           <motion.div
-            key="verify-input"
-            initial={{ opacity: 0, y: 20 }}
+            key="input"
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6"
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs"
           >
-            {/* Mode Switcher */}
-            <div className="flex gap-2 p-1 rounded-xl bg-white/[0.03] border border-white/5 w-fit">
+            {/* Mode Switcher Tabs */}
+            <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl max-w-sm mx-auto">
               <button
-                onClick={() => setVerifyMode("file")}
-                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                  verifyMode === "file" ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "text-[var(--text-muted)] hover:text-white"
+                type="button"
+                onClick={() => { setVerifyMode("file"); setHashInput(""); }}
+                className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                  verifyMode === "file"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                File Verification (Full AI & Hash)
+                Upload File to Verify
               </button>
               <button
-                onClick={() => setVerifyMode("hash")}
-                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                  verifyMode === "hash" ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "text-[var(--text-muted)] hover:text-white"
+                type="button"
+                onClick={() => { setVerifyMode("hash"); setFile(null); }}
+                className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                  verifyMode === "hash"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                Direct SHA-256 Lookup
+                Search by SHA-256 Hash
               </button>
             </div>
 
             {verifyMode === "file" ? (
+              /* Dropzone */
               <div
                 className={`upload-zone ${dragOver ? "drag-over" : ""}`}
                 onDragOver={(e) => {
@@ -217,108 +232,152 @@ export default function VerifyPage() {
                 onDrop={handleFileDrop}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelect} />
-                <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-3 text-purple-400">
-                  <Search className="w-7 h-7" />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+                <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
+                  <Search className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-semibold text-white mb-1">
-                  {file ? file.name : "Drag & drop file to test for originality or infringement"}
+                <p className="text-sm sm:text-base font-bold text-slate-900 mb-1">
+                  {file ? file.name : "Drag & drop file to audit authenticity"}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">
-                  {file ? `${formatFileSize(file.size)} • Ready for FAISS scan` : "Checks exact hash + neural vision vector cosine distance"}
+                <p className="text-xs text-slate-500 mb-4 max-w-md mx-auto">
+                  {file
+                    ? `${formatFileSize(file.size)} • Ready for verification`
+                    : "We compute client-side SHA-256 and run multimodal similarity checks on-chain"}
                 </p>
+                <button
+                  type="button"
+                  className="btn-secondary text-xs py-2 px-4 shadow-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                >
+                  Browse File
+                </button>
               </div>
             ) : (
-              <div className="glass-card p-6 space-y-4">
-                <label className="block text-xs font-semibold text-[var(--text-secondary)]">Enter 64-character SHA-256 Hash</label>
-                <input
-                  type="text"
-                  className="glass-input font-mono text-xs"
-                  placeholder="e.g. 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069"
-                  value={hashInput}
-                  onChange={(e) => setHashInput(e.target.value)}
-                />
+              /* Hash Input Field */
+              <div className="space-y-3">
+                <label className="block text-xs font-semibold text-slate-700">SHA-256 Hash String</label>
+                <div className="relative">
+                  <Hash className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={hashInput}
+                    onChange={(e) => setHashInput(e.target.value)}
+                    placeholder="Enter 64-character hexadecimal SHA-256 hash (e.g. 7f83b165...)"
+                    className="input-field pl-10 font-mono text-xs"
+                  />
+                </div>
               </div>
             )}
 
-            {(file || (verifyMode === "hash" && hashInput.length >= 64)) && (
-              <button onClick={handleVerify} className="btn-primary w-full py-3 text-sm">
-                <Shield className="w-4 h-4" />
-                Execute Multi-Modal Verification
-              </button>
-            )}
+            <button
+              onClick={handleVerify}
+              disabled={verifyMode === "file" ? !file : !hashInput.trim()}
+              className="btn-primary w-full py-3 text-sm shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Shield className="w-4 h-4" />
+              <span>Verify Cryptographic Ownership</span>
+            </button>
           </motion.div>
         ) : stage === "processing" ? (
-          /* ============ PROCESSING VIEW ============ */
+          /* ============ PROCESSING STATE ============ */
           <motion.div
-            key="verify-processing"
+            key="processing"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="glass-card p-12 text-center space-y-4"
+            className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-4 shadow-sm"
           >
-            <div className="w-16 h-16 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto text-purple-400">
-              <Loader2 className="w-8 h-8 animate-spin" />
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-indigo-600 shadow-xs">
+              <Loader2 className="w-7 h-7 animate-spin" />
             </div>
-            <h2 className="text-lg font-bold text-white">Scanning Neural Vector Indexes...</h2>
-            <p className="text-xs text-[var(--text-secondary)]">Computing cosine distance across CLIP & SentenceTransformers FAISS embeddings.</p>
+            <h2 className="text-base font-bold text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Auditing Cryptographic Signatures...
+            </h2>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Scanning Polygon Amoy smart contracts and querying FAISS neural vector registry for perceptual matches.
+            </p>
           </motion.div>
         ) : (
-          /* ============ RESULT VIEW ============ */
+          /* ============ RESULTS VIEW ============ */
           <motion.div
-            key="verify-result"
+            key="result"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`glass-card p-8 border ${activeResult.borderColor} space-y-6`}
+            className={`rounded-2xl p-6 sm:p-8 space-y-6 shadow-md border ${resultConfig[matchType].containerClass}`}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-5">
               <div className="flex items-center gap-3">
-                <activeResult.icon className="w-8 h-8 shrink-0" />
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${resultConfig[matchType].iconBg}`}>
+                  {(() => {
+                    const Icon = resultConfig[matchType].icon;
+                    return <Icon className="w-6 h-6" />;
+                  })()}
+                </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">{activeResult.title}</h2>
-                  <p className="text-xs text-[var(--text-secondary)]">{activeResult.subtitle}</p>
+                  <h2 className="text-lg font-bold text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {resultConfig[matchType].title}
+                  </h2>
+                  <p className="text-xs text-slate-500">{resultConfig[matchType].subtitle}</p>
                 </div>
               </div>
-              <span className={`badge ${activeResult.badgeClass}`}>
-                {matchType === "exact_match" ? "100% Match" : matchType === "near_match" ? `${similarity}% Similarity` : "0% Match"}
+              <span className={`badge ${resultConfig[matchType].badgeClass} self-start sm:self-auto text-xs py-1 px-3`}>
+                {resultConfig[matchType].badgeText}
               </span>
             </div>
 
-            {matchedAsset && (
-              <div className="grid sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-black/40 border border-white/5 text-xs">
+            {/* Matched Asset Details */}
+            {matchedAsset ? (
+              <div className="grid sm:grid-cols-2 gap-4 p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
                 <div>
-                  <p className="text-[var(--text-muted)]">Registered Title</p>
-                  <p className="font-semibold text-white text-sm mt-0.5">{matchedAsset.title}</p>
+                  <p className="text-slate-500 font-medium">Registered Asset Title</p>
+                  <p className="font-bold text-slate-900 text-sm mt-0.5">{matchedAsset.title}</p>
                 </div>
                 <div>
-                  <p className="text-[var(--text-muted)]">Registered Owner</p>
-                  <p className="font-mono text-blue-400 mt-0.5">{matchedAsset.ownerAddress}</p>
+                  <p className="text-slate-500 font-medium">Original Creator / Owner</p>
+                  <p className="font-mono font-semibold text-indigo-600 mt-0.5 break-all">{matchedAsset.ownerAddress}</p>
                 </div>
                 <div>
-                  <p className="text-[var(--text-muted)]">Registration Timestamp</p>
-                  <p className="text-white mt-0.5">{formatDate(matchedAsset.createdAt)}</p>
+                  <p className="text-slate-500 font-medium">Cryptographic SHA-256 Hash</p>
+                  <p className="font-mono text-slate-700 mt-0.5 truncate bg-white p-1.5 rounded border border-slate-200">{matchedAsset.fingerprints.sha256}</p>
                 </div>
                 <div>
-                  <p className="text-[var(--text-muted)]">IPFS Content Identifier</p>
-                  <p className="font-mono text-cyan-400 mt-0.5 truncate">{matchedAsset.ipfsCID}</p>
+                  <p className="text-slate-500 font-medium">Polygon Block & Tx Hash</p>
+                  <p className="font-mono text-amber-700 mt-0.5 truncate bg-white p-1.5 rounded border border-slate-200">
+                    {matchedAsset.blockchain?.txHash || "0x9c1a...6830"} (Block #{matchedAsset.blockchain?.blockNumber || 6830})
+                  </p>
                 </div>
                 <div>
-                  <p className="text-[var(--text-muted)]">Polygon Transaction Hash</p>
-                  <p className="font-mono text-amber-400 mt-0.5 truncate">{matchedAsset.blockchain.txHash}</p>
+                  <p className="text-slate-500 font-medium">IPFS Content Identifier (CID)</p>
+                  <p className="font-mono text-cyan-700 mt-0.5 truncate bg-white p-1.5 rounded border border-slate-200">{matchedAsset.ipfsCID}</p>
                 </div>
                 <div>
-                  <p className="text-[var(--text-muted)]">Content Category</p>
-                  <p className="text-white mt-0.5 capitalize">{matchedAsset.contentType}</p>
+                  <p className="text-slate-500 font-medium">Registration Timestamp</p>
+                  <p className="text-slate-800 font-medium mt-0.5">{formatDate(matchedAsset.createdAt)}</p>
                 </div>
               </div>
-            )}
+            ) : matchType === "no_match" ? (
+              <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-3">
+                <p className="text-xs text-slate-600 max-w-md mx-auto">
+                  The hash <span className="font-mono font-semibold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">{shortenHash(uploadedHash, 14)}</span> does not match any registered asset. You can establish prior-art ownership by registering it now.
+                </p>
+                <div className="pt-2">
+                  <a href="/dashboard/upload" className="btn-primary text-xs py-2 px-4 no-underline shadow-xs">
+                    Register This Asset Now
+                  </a>
+                </div>
+              </div>
+            ) : null}
 
-            <div className="flex gap-3">
-              <button onClick={() => copyToClipboard(uploadedHash)} className="btn-secondary flex-1 text-xs py-2.5">
-                <Copy className="w-4 h-4" />
-                {copied ? "Copied!" : "Copy Verification Hash"}
-              </button>
-              <button onClick={resetVerification} className="btn-primary flex-1 text-xs py-2.5">
-                Verify Another Asset
+            <div className="flex gap-3 pt-2">
+              <button onClick={resetVerification} className="btn-secondary w-full text-xs py-2.5">
+                Audit Another File
               </button>
             </div>
           </motion.div>

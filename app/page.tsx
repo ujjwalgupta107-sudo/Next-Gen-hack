@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import {
   Shield,
@@ -19,19 +19,31 @@ import {
   ChevronRight,
   Wallet,
   ExternalLink,
-  Box,
   Sparkles,
   TrendingUp,
   Users,
   FileText,
+  Copy,
+  Layers,
+  Database,
+  Server,
+  Code2,
+  ShoppingBag,
+  Check,
+  HelpCircle,
+  Cpu,
+  Image as ImageIcon,
+  Music,
+  Film,
+  Palette,
 } from "lucide-react";
 import Link from "next/link";
 import { MOCK_STATS, CONTENT_TYPES } from "./lib/store";
 
 // ============================================
-// PARTICLE BACKGROUND
+// LIGHT AMBIENT PARTICLE BACKGROUND
 // ============================================
-function ParticleField() {
+function LightParticleField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -50,14 +62,14 @@ function ParticleField() {
     resize();
     window.addEventListener("resize", resize);
 
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 45; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.5 + 0.1,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        size: Math.random() * 2 + 1,
+        opacity: Math.random() * 0.25 + 0.08,
       });
     }
 
@@ -72,20 +84,19 @@ function ParticleField() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(59, 130, 246, ${p.opacity})`;
+        ctx.fillStyle = `rgba(79, 70, 229, ${p.opacity})`;
         ctx.fill();
 
-        // Draw connections
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[j].x - p.x;
           const dy = particles[j].y - p.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          if (dist < 130) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(59, 130, 246, ${0.06 * (1 - dist / 120)})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(79, 70, 229, ${0.04 * (1 - dist / 130)})`;
+            ctx.lineWidth = 0.6;
             ctx.stroke();
           }
         }
@@ -123,7 +134,7 @@ function AnimatedCounter({ target, suffix = "", prefix = "" }: { target: number;
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated.current) {
           hasAnimated.current = true;
-          const duration = 2000;
+          const duration = 1800;
           const startTime = Date.now();
           const animate = () => {
             const elapsed = Date.now() - startTime;
@@ -135,14 +146,14 @@ function AnimatedCounter({ target, suffix = "", prefix = "" }: { target: number;
           animate();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.2 }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [target]);
 
   return (
-    <span ref={ref}>
+    <span ref={ref} className="tabular-nums">
       {prefix}
       {count.toLocaleString()}
       {suffix}
@@ -158,84 +169,152 @@ function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
+    const handler = () => setScrolled(window.scrollY > 15);
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
   return (
     <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      initial={{ y: -60, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
         scrolled
-          ? "bg-[rgba(6,6,14,0.85)] backdrop-blur-xl border-b border-white/5"
-          : "bg-transparent"
+          ? "bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs"
+          : "bg-white/80 backdrop-blur-sm border-b border-slate-100"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 no-underline">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <Shield className="w-5 h-5 text-white" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 no-underline group">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-xs shadow-indigo-500/20 group-hover:bg-indigo-700 transition-colors">
+            <Shield className="w-4 h-4 text-white" />
           </div>
-          <span className="text-lg font-bold text-white font-[family-name:var(--font-sans)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Proof<span className="gradient-text">Vault</span>
+          <span className="text-lg font-bold text-slate-900 tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Proof<span className="text-indigo-600">Vault</span> <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase">AI</span>
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
-          {["Features", "How It Works", "Pricing", "Docs"].map((item) => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
-              className="text-sm text-[var(--text-secondary)] hover:text-white transition-colors no-underline"
-            >
-              {item}
-            </a>
-          ))}
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center gap-7">
+          <a href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors no-underline">
+            Features
+          </a>
+          <a href="#how-it-works" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors no-underline">
+            How It Works
+          </a>
+          <a href="#technology" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors no-underline">
+            Technology
+          </a>
+          <a href="#pricing" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors no-underline">
+            Pricing
+          </a>
+          <Link href="/dashboard/verify" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors no-underline flex items-center gap-1">
+            <Search className="w-3.5 h-3.5" />
+            Verify
+          </Link>
+          <Link href="/dashboard/marketplace" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors no-underline flex items-center gap-1">
+            <ShoppingBag className="w-3.5 h-3.5" />
+            Marketplace
+          </Link>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link href="/auth/login" className="text-xs text-slate-300 hover:text-white font-medium px-3 py-1.5 rounded-lg hover:bg-white/5 transition no-underline">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/auth/login"
+            className="text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 px-3 py-2 rounded-lg transition-colors no-underline hidden sm:inline-block"
+          >
             Sign In
           </Link>
-          <Link href="/auth/signup" className="text-xs text-cyan-400 border border-cyan-500/30 hover:border-cyan-500 hover:bg-cyan-500/10 font-medium px-3 py-1.5 rounded-lg transition no-underline">
-            Sign Up
-          </Link>
-          <Link href="/dashboard" className="btn-primary text-xs no-underline">
-            <Wallet className="w-3.5 h-3.5" />
-            Launch App
-          </Link>
-          <button
-            className="md:hidden btn-icon"
-            onClick={() => setMobileOpen(!mobileOpen)}
+          <Link
+            href="/dashboard"
+            className="btn-primary text-xs py-2 px-3.5 no-underline shadow-xs"
           >
-            <span className="text-lg">{mobileOpen ? "✕" : "☰"}</span>
+            <Wallet className="w-3.5 h-3.5" />
+            <span>Launch App</span>
+          </Link>
+
+          {/* Mobile Hamburger */}
+          <button
+            className="md:hidden btn-icon w-9 h-9"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle navigation"
+          >
+            <span className="text-base font-semibold">{mobileOpen ? "✕" : "☰"}</span>
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t border-white/5 bg-[rgba(6,6,14,0.95)] backdrop-blur-xl"
+            className="md:hidden border-t border-slate-200 bg-white shadow-lg overflow-hidden"
           >
-            <div className="px-6 py-4 flex flex-col gap-3">
-              {["Features", "How It Works", "Pricing", "Docs"].map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
-                  className="text-sm text-[var(--text-secondary)] hover:text-white py-2 no-underline"
+            <div className="px-5 py-4 flex flex-col gap-2.5">
+              <a
+                href="#features"
+                className="text-sm font-medium text-slate-700 hover:text-indigo-600 py-1.5 no-underline"
+                onClick={() => setMobileOpen(false)}
+              >
+                Features
+              </a>
+              <a
+                href="#how-it-works"
+                className="text-sm font-medium text-slate-700 hover:text-indigo-600 py-1.5 no-underline"
+                onClick={() => setMobileOpen(false)}
+              >
+                How It Works
+              </a>
+              <a
+                href="#technology"
+                className="text-sm font-medium text-slate-700 hover:text-indigo-600 py-1.5 no-underline"
+                onClick={() => setMobileOpen(false)}
+              >
+                Technology
+              </a>
+              <a
+                href="#pricing"
+                className="text-sm font-medium text-slate-700 hover:text-indigo-600 py-1.5 no-underline"
+                onClick={() => setMobileOpen(false)}
+              >
+                Pricing
+              </a>
+              <Link
+                href="/dashboard/verify"
+                className="text-sm font-medium text-slate-700 hover:text-indigo-600 py-1.5 no-underline"
+                onClick={() => setMobileOpen(false)}
+              >
+                Verify Asset
+              </Link>
+              <Link
+                href="/dashboard/marketplace"
+                className="text-sm font-medium text-slate-700 hover:text-indigo-600 py-1.5 no-underline"
+                onClick={() => setMobileOpen(false)}
+              >
+                Marketplace & Licensing
+              </Link>
+              <div className="pt-2 border-t border-slate-100 flex gap-2">
+                <Link
+                  href="/auth/login"
+                  className="btn-secondary text-xs flex-1 text-center py-2 no-underline"
                   onClick={() => setMobileOpen(false)}
                 >
-                  {item}
-                </a>
-              ))}
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="btn-primary text-xs flex-1 text-center py-2 no-underline"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </div>
             </div>
           </motion.div>
         )}
@@ -248,215 +327,308 @@ function Navbar() {
 // HERO SECTION
 // ============================================
 function HeroSection() {
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 0.3], [0, -50]);
-  const opacity = useTransform(scrollYProgress, [0, 0.3], [1, 0.3]);
-
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-      {/* Gradient Orbs */}
-      <div className="hero-gradient-orb w-[600px] h-[600px] bg-blue-600 top-[-200px] left-[-200px]" style={{ position: "absolute" }} />
-      <div className="hero-gradient-orb w-[500px] h-[500px] bg-purple-600 bottom-[-150px] right-[-150px]" style={{ position: "absolute" }} />
-      <div className="hero-gradient-orb w-[300px] h-[300px] bg-cyan-500 top-[30%] right-[20%]" style={{ position: "absolute" }} />
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+      {/* Subtle Ambient Light Gradients */}
+      <div className="light-ambient-glow w-[500px] h-[500px] bg-indigo-200/40 top-[-80px] left-1/2 -translate-x-1/2" />
+      <div className="light-ambient-glow w-[350px] h-[350px] bg-cyan-200/30 top-[20%] right-[-100px]" />
+      <div className="light-ambient-glow w-[300px] h-[300px] bg-purple-200/30 bottom-0 left-[-100px]" />
 
       {/* Grid Pattern */}
-      <div className="absolute inset-0 grid-pattern opacity-50" />
+      <div className="absolute inset-0 light-grid-pattern opacity-60 pointer-events-none" />
 
-      <motion.div style={{ y, opacity }} className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-        {/* Badge */}
+      <div className="relative z-10 max-w-5xl mx-auto text-center">
+        {/* Top Tagline Badge */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(59,130,246,0.1)] border border-[rgba(59,130,246,0.2)] mb-8"
+          transition={{ duration: 0.4 }}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/70 mb-6 shadow-xs"
         >
-          <Sparkles className="w-4 h-4 text-blue-400" />
-          <span className="text-sm text-blue-400 font-medium">Powered by AI & Polygon Blockchain</span>
+          <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+          <span className="text-xs text-indigo-700 font-semibold tracking-wide">
+            Enterprise IP Protection & Blockchain Proof
+          </span>
+          <span className="text-indigo-300">|</span>
+          <span className="text-[11px] text-slate-600 font-medium">Polygon Amoy & Multi-Model AI</span>
         </motion.div>
 
         {/* Headline */}
         <motion.h1
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6"
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 mb-6 max-w-4xl mx-auto leading-[1.12]"
           style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
-          Protecting Digital
+          Protect Your Digital Work.
           <br />
-          <span className="gradient-text">Creativity</span> Through
-          <br />
-          <span className="gradient-text-accent">AI & Blockchain</span>
+          <span className="gradient-text">Prove It. Verify It. Own It.</span>
         </motion.h1>
 
-        {/* Subheadline */}
+        {/* Subtitle */}
         <motion.p
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-10 leading-relaxed"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto mb-9 leading-relaxed"
         >
-          Prove ownership of any digital asset in{" "}
-          <span className="text-white font-semibold">under 30 seconds</span> for{" "}
-          <span className="text-white font-semibold">less than $0.01</span>.
-          AI fingerprinting meets immutable blockchain proof.
+          Generate multi-layer cryptographic AI fingerprints, pin to decentralized IPFS, and anchor permanent proof on Polygon in{" "}
+          <strong className="text-slate-900 font-semibold">under 30 seconds</strong> for{" "}
+          <strong className="text-slate-900 font-semibold">less than $0.01</strong>.
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-14"
         >
-          <Link href="/dashboard/upload" className="btn-primary text-base px-8 py-4 no-underline">
-            <Upload className="w-5 h-5" />
-            Register Your Work
+          <Link
+            href="/dashboard/upload"
+            className="btn-primary text-sm sm:text-base px-6 py-3.5 rounded-xl no-underline w-full sm:w-auto shadow-md"
+          >
+            <Upload className="w-4 h-4" />
+            <span>Protect Your Work</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
-          <Link href="/dashboard/verify" className="btn-secondary text-base px-8 py-4 no-underline">
-            <Search className="w-5 h-5" />
-            Verify Ownership
+          <Link
+            href="/dashboard/verify"
+            className="btn-secondary text-sm sm:text-base px-6 py-3.5 rounded-xl no-underline w-full sm:w-auto"
+          >
+            <Search className="w-4 h-4 text-slate-500" />
+            <span>Verify Ownership</span>
           </Link>
         </motion.div>
 
-        {/* Stats */}
+        {/* Premium Visual Pipeline Flow */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto"
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="max-w-4xl mx-auto mb-16 p-4 sm:p-6 bg-white border border-slate-200 rounded-2xl shadow-md"
+        >
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 text-left flex items-center justify-between">
+            <span>Cryptographic Verification Pipeline</span>
+            <span className="badge badge-green text-[10px]">Zero-Knowledge Ready</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-left">
+            {/* Step 1 */}
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 relative">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                  1
+                </div>
+                <span className="font-semibold text-slate-900 text-xs">Digital Asset</span>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-normal">
+                Image, Audio, Code, Video, or Docs uploaded securely.
+              </p>
+              <div className="mt-2 text-[10px] font-mono text-slate-600 bg-white px-2 py-1 rounded border border-slate-200 truncate">
+                RAW_FILE_STREAM
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="p-3.5 rounded-xl bg-indigo-50/50 border border-indigo-100 relative">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                  2
+                </div>
+                <span className="font-semibold text-slate-900 text-xs">AI Fingerprint</span>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-normal">
+                SHA-256 + 2D-DCT pHash + Neural Vision Embeddings.
+              </p>
+              <div className="mt-2 text-[10px] font-mono text-indigo-700 bg-white px-2 py-1 rounded border border-indigo-200 truncate">
+                0x7f83...9069
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="p-3.5 rounded-xl bg-purple-50/50 border border-purple-100 relative">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-lg bg-purple-600 text-white flex items-center justify-center font-bold text-xs">
+                  3
+                </div>
+                <span className="font-semibold text-slate-900 text-xs">Blockchain Proof</span>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-normal">
+                Anchored to Polygon smart contracts + IPFS CID.
+              </p>
+              <div className="mt-2 text-[10px] font-mono text-purple-700 bg-white px-2 py-1 rounded border border-purple-200 truncate">
+                Polygon Block #6830
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div className="p-3.5 rounded-xl bg-green-50/50 border border-green-100 relative">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-lg bg-green-600 text-white flex items-center justify-center font-bold text-xs">
+                  4
+                </div>
+                <span className="font-semibold text-slate-900 text-xs">Proof Certificate</span>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-normal">
+                Immutable ownership evidence + optional Proof NFT.
+              </p>
+              <div className="mt-2 text-[10px] font-mono text-green-700 bg-white px-2 py-1 rounded border border-green-200 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" /> VERIFIED
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Live Metrics Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto"
         >
           {[
-            { label: "Assets Protected", value: MOCK_STATS.assetsProtected, suffix: "+" },
-            { label: "Verifications", value: MOCK_STATS.totalVerifications, suffix: "+" },
-            { label: "Creators", value: MOCK_STATS.totalCreators, suffix: "+" },
-            { label: "Gas Saved", value: 99, suffix: ".9%" },
+            { label: "Assets Protected", value: MOCK_STATS.assetsProtected, suffix: "+", icon: Shield },
+            { label: "Verifications Completed", value: MOCK_STATS.totalVerifications, suffix: "+", icon: Search },
+            { label: "Verified Creators", value: MOCK_STATS.totalCreators, suffix: "+", icon: Users },
+            { label: "Gas Cost Reduced", value: 99, suffix: ".9%", icon: Zap },
           ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold gradient-text mb-1">
+            <div key={stat.label} className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-xs">
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 <AnimatedCounter target={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="text-xs sm:text-sm text-[var(--text-muted)]">{stat.label}</div>
+              <div className="text-xs text-slate-500 font-medium">{stat.label}</div>
             </div>
           ))}
         </motion.div>
-      </motion.div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="w-6 h-10 rounded-full border-2 border-white/20 flex items-start justify-center p-1.5"
-        >
-          <div className="w-1.5 h-2.5 rounded-full bg-white/40" />
-        </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }
 
 // ============================================
-// WORKFLOW SECTION (How It Works)
+// TRUST & TECHNOLOGY SECTION
+// ============================================
+function TrustSection() {
+  const technologies = [
+    { name: "AI Fingerprinting", detail: "CLIP, CodeBERT, FAISS", icon: Brain, badge: "Neural" },
+    { name: "Polygon PoS", detail: "Amoy Testnet & Mainnet", icon: Blocks, badge: "L2 Chain" },
+    { name: "IPFS Storage", detail: "Decentralized Pinata Pins", icon: Globe, badge: "Storage" },
+    { name: "FastAPI Backend", detail: "High-throughput Vector API", icon: Server, badge: "Core" },
+    { name: "Next.js 16", detail: "Modern App Router + React 19", icon: Code2, badge: "Frontend" },
+    { name: "MongoDB Atlas", detail: "Metadata & Account Audits", icon: Database, badge: "Database" },
+    { name: "Zero Knowledge", detail: "Proof Without Content Reveal", icon: Lock, badge: "Security" },
+    { name: "ERC-721 Proofs", detail: "Composable Ownership NFTs", icon: Sparkles, badge: "Standard" },
+  ];
+
+  return (
+    <section id="technology" className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50/70 border-y border-slate-200/80">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <span className="badge badge-blue mb-3">Enterprise Stack</span>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Engineered with Battle-Tested Technology
+          </h2>
+          <p className="text-sm text-slate-600 mt-2">
+            Combining decentralized ledger immutability with multimodal AI computer vision and semantic embeddings.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          {technologies.map((tech) => (
+            <div
+              key={tech.name}
+              className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all"
+            >
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <tech.icon className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                  {tech.badge}
+                </span>
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">{tech.name}</h3>
+              <p className="text-xs text-slate-500 mt-0.5">{tech.detail}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================
+// WORKFLOW (HOW IT WORKS) SECTION
 // ============================================
 function WorkflowSection() {
   const steps = [
     {
+      number: "01",
       icon: Upload,
       title: "Upload Your Content",
-      desc: "Drag & drop any digital file — images, videos, code, music, documents, designs, or AI-generated content.",
-      color: "from-blue-500 to-blue-600",
+      desc: "Drag & drop high-resolution images, music, video masters, documents, or source code repositories.",
     },
     {
+      number: "02",
       icon: Brain,
-      title: "AI Analysis",
-      desc: "Our AI engine generates multi-layer fingerprints: SHA-256 hash, perceptual hash, and semantic embeddings.",
-      color: "from-purple-500 to-purple-600",
+      title: "Multimodal AI Fingerprint",
+      desc: "Computes native SHA-256 cryptographic hashes alongside 2D-DCT perceptual hash and AI neural embeddings.",
     },
     {
-      icon: Fingerprint,
-      title: "Fingerprint Generation",
-      desc: "6 independent verification channels created — making the proof resilient to crops, compression, and modifications.",
-      color: "from-cyan-500 to-cyan-600",
+      number: "03",
+      icon: Globe,
+      title: "Decentralized IPFS Pinning",
+      desc: "Content metadata and cryptographic fingerprints are pinned to Pinata's global decentralized network.",
     },
     {
+      number: "04",
       icon: Blocks,
-      title: "Blockchain Anchoring",
-      desc: "Hash anchored on Polygon with commit-reveal protection. Merkle batching reduces gas cost by 99.9%.",
-      color: "from-green-500 to-green-600",
+      title: "Polygon Smart Contract Anchoring",
+      desc: "Ownership registration transaction is mined on Polygon with timestamped cryptographic commitment.",
     },
     {
+      number: "05",
       icon: FileCheck,
-      title: "Certificate & NFT",
-      desc: "Receive an immutable ownership certificate. Optionally mint a composable Proof-of-Ownership NFT.",
-      color: "from-amber-500 to-amber-600",
+      title: "Proof Certificate & NFT",
+      desc: "Receive an immutable, downloadable certificate of ownership with optional ERC-721 token minting.",
     },
   ];
 
   return (
-    <section id="how-it-works" className="relative py-24 px-6">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="badge badge-blue mb-4 inline-flex">How It Works</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            From Upload to <span className="gradient-text">Immutable Proof</span>
+    <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <span className="badge badge-purple mb-3">5-Step Process</span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            From Asset to <span className="gradient-text">Immutable Proof</span>
           </h2>
-          <p className="text-[var(--text-secondary)] max-w-xl mx-auto">
-            Five steps to permanent, AI-verified ownership — in under 30 seconds.
+          <p className="text-base text-slate-600 mt-2">
+            Mathematical, tamper-proof proof of existence and creator attribution in 30 seconds.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="relative max-w-5xl mx-auto">
-          {/* Connecting vertical line */}
-          <div className="absolute left-7 lg:left-1/2 top-8 bottom-8 w-0.5 -translate-x-1/2 bg-gradient-to-b from-blue-500/30 via-purple-500/30 to-amber-500/30" />
-
-          <div className="space-y-8 lg:space-y-12 relative z-10">
-            {steps.map((step, i) => {
-              const isEven = i % 2 === 0;
-              return (
-                <motion.div
-                  key={step.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="flex flex-col lg:flex-row items-center"
-                >
-                  {/* Left Column / Card position for even steps */}
-                  <div className={`w-full lg:w-1/2 pl-16 lg:pl-0 ${isEven ? "lg:pr-12 lg:text-right lg:order-0" : "lg:pl-12 lg:order-2"}`}>
-                    <div className="glass-card p-6 text-left">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="badge badge-blue text-[10px]">Step {i + 1}</span>
-                      </div>
-                      <h3 className="text-lg font-bold text-white mb-2">{step.title}</h3>
-                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{step.desc}</p>
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 relative">
+          {steps.map((step, idx) => (
+            <div
+              key={step.number}
+              className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs relative flex flex-col justify-between hover:border-indigo-200 hover:shadow-sm transition-all"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <step.icon className="w-5 h-5" />
                   </div>
-
-                  {/* Center Icon */}
-                  <div className="absolute left-0 lg:static lg:w-auto flex items-center justify-center shrink-0 lg:order-1">
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg border-4 border-[var(--bg-primary)]`}>
-                      <step.icon className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
-
-                  {/* Spacer for alternating layout */}
-                  <div className={`hidden lg:block lg:w-1/2 ${isEven ? "lg:order-2" : "lg:order-0"}`} />
-                </motion.div>
-              );
-            })}
-          </div>
+                  <span className="text-xs font-mono font-bold text-slate-400">
+                    {step.number}
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-slate-900 mb-2">{step.title}</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">{step.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -470,76 +642,84 @@ function FeaturesSection() {
   const features = [
     {
       icon: Brain,
-      title: "AI-Powered Detection",
-      desc: "CLIP, CodeBERT, Whisper — multi-model AI catches exact copies AND near-duplicates, even after modifications.",
-      gradient: "from-blue-500 to-cyan-500",
+      title: "AI Fingerprinting",
+      desc: "Multi-model perceptual analysis using CLIP and 2D-DCT catches duplicate works even after cropping, resizing, and filters.",
+      badge: "Perceptual AI",
     },
     {
       icon: Blocks,
-      title: "Blockchain Anchoring",
-      desc: "Polygon PoS for speed ($0.001/tx), Ethereum L1 for finality. Merkle batching for 99.9% gas reduction.",
-      gradient: "from-purple-500 to-blue-500",
+      title: "Blockchain Ownership",
+      desc: "Immutable timestamping and registry contracts on Polygon ensure mathematical proof that cannot be retroactively forged.",
+      badge: "Polygon Amoy",
     },
     {
-      icon: Lock,
-      title: "ZK-Proof Privacy",
-      desc: "Prove ownership without revealing content. Zero-knowledge proofs keep your creative work private.",
-      gradient: "from-pink-500 to-purple-500",
+      icon: Search,
+      title: "Similarity Detection",
+      desc: "Real-time FAISS vector database search compares uploaded assets against thousands of indexed works in milliseconds.",
+      badge: "Vector Search",
     },
     {
-      icon: Zap,
-      title: "< 30 Second Proof",
-      desc: "Upload to blockchain confirmation in under 30 seconds. No forms, no waiting, no bureaucracy.",
-      gradient: "from-amber-500 to-orange-500",
+      icon: Sparkles,
+      title: "NFT Proof of Ownership",
+      desc: "Mint standardized ERC-721 tokens linked directly to your on-chain ownership hash and IPFS CID.",
+      badge: "ERC-721",
     },
     {
       icon: Globe,
-      title: "Global Verification",
-      desc: "Anyone, anywhere can verify ownership instantly. No borders, no intermediaries, no fees.",
-      gradient: "from-green-500 to-cyan-500",
+      title: "IPFS Storage",
+      desc: "Decentralized, content-addressed storage through Pinata ensures your digital certificates remain accessible forever.",
+      badge: "Decentralized",
+    },
+    {
+      icon: ShoppingBag,
+      title: "Smart Licensing",
+      desc: "Set commercial or exclusive licensing terms directly on smart contracts and withdraw earnings securely.",
+      badge: "Pull-Withdrawal",
     },
     {
       icon: Shield,
-      title: "Tamper-Proof",
-      desc: "Commit-reveal anti-front-running. Multi-hash verification. Immutable blockchain records.",
-      gradient: "from-red-500 to-pink-500",
+      title: "Instant Verification",
+      desc: "Anyone, anywhere can verify proof of creation with zero fees by uploading a file or entering a SHA-256 hash.",
+      badge: "Public Audit",
+    },
+    {
+      icon: Lock,
+      title: "Enterprise Auth & SIWE",
+      desc: "Sign-In with Ethereum (SIWE) MetaMask wallet authentication backed by cryptographic challenge nonces and JWT.",
+      badge: "EIP-4361",
     },
   ];
 
   return (
-    <section id="features" className="relative py-24 px-6">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="badge badge-purple mb-4 inline-flex">Features</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Built for the <span className="gradient-text-accent">Creator Economy</span>
+    <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50/70 border-t border-slate-200/80">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <span className="badge badge-blue mb-3">Platform Features</span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Designed for Creators, Developers & Studios
           </h2>
-          <p className="text-[var(--text-secondary)] max-w-xl mx-auto">
-            Every feature designed to protect creators and verify authenticity at scale.
+          <p className="text-base text-slate-600 mt-2">
+            Everything needed to assert digital ownership, catch plagiarism, and monetize original creative works.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, i) => (
-            <motion.div
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {features.map((feature) => (
+            <div
               key={feature.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className="glass-card p-7 group"
+              className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between group"
             >
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
-                <feature.icon className="w-6 h-6 text-white" />
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors flex items-center justify-center">
+                    <feature.icon className="w-5 h-5" />
+                  </div>
+                  <span className="badge badge-gray text-[10px]">{feature.badge}</span>
+                </div>
+                <h3 className="text-base font-bold text-slate-900 mb-2">{feature.title}</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">{feature.desc}</p>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{feature.desc}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -551,37 +731,42 @@ function FeaturesSection() {
 // SUPPORTED CONTENT SECTION
 // ============================================
 function ContentSection() {
-  return (
-    <section className="relative py-24 px-6">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="badge badge-cyan mb-4 inline-flex">Supported Content</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Protect <span className="gradient-text-cyan">Any Digital Asset</span>
-          </h2>
-        </motion.div>
+  const TYPE_ICONS: Record<string, typeof ImageIcon> = {
+    image: ImageIcon,
+    code: Code2,
+    document: FileText,
+    audio: Music,
+    video: Film,
+    design: Palette,
+    ai: Brain,
+  };
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {CONTENT_TYPES.map((type: { id: string; label: string; icon: string; count: number }, i: number) => (
-            <motion.div
-              key={type.id || i}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              whileHover={{ scale: 1.05, y: -4 }}
-              className="glass-card p-6 text-center cursor-default"
-            >
-              <div className="text-3xl mb-3">{type.icon}</div>
-              <div className="font-semibold text-white text-sm mb-1">{type.label}</div>
-              <div className="text-xs text-[var(--text-muted)]">{type.count.toLocaleString()} registered</div>
-            </motion.div>
-          ))}
+  return (
+    <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <span className="badge badge-cyan mb-3">File Compatibility</span>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Protect Any Digital Medium
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          {CONTENT_TYPES.map((type: { id: string; label: string; icon: string; count: number }) => {
+            const IconComp = TYPE_ICONS[type.id] || FileText;
+            return (
+              <div
+                key={type.id || type.label}
+                className="bg-white border border-slate-200 rounded-xl p-5 text-center shadow-xs hover:border-indigo-300 hover:shadow-sm transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+                  <IconComp className="w-5 h-5" />
+                </div>
+                <div className="font-bold text-slate-900 text-xs sm:text-sm">{type.label}</div>
+                <div className="text-[11px] text-slate-500 mt-1">{type.count.toLocaleString()} registered</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -593,58 +778,47 @@ function ContentSection() {
 // ============================================
 function ComparisonSection() {
   const comparisons = [
-    { feature: "Registration Time", old: "3-6 months", new: "< 30 seconds" },
-    { feature: "Cost per Filing", old: "$35 - $800+", new: "< $0.01" },
-    { feature: "Geographic Scope", old: "Country-locked", new: "Global" },
-    { feature: "Near-Duplicate Detection", old: "None", new: "AI-powered" },
-    { feature: "Proof Tampering", old: "Possible", new: "Impossible" },
-    { feature: "Privacy", old: "Public filing", new: "ZK-proof private" },
-    { feature: "Automation", old: "Manual forms", new: "Fully automated" },
-    { feature: "Verification", old: "Legal process", new: "Instant online" },
+    { feature: "Registration Time", old: "3 to 6 months", new: "< 30 seconds" },
+    { feature: "Cost per Asset", old: "$35 to $800+", new: "< $0.01 (Gas Optimized)" },
+    { feature: "Jurisdiction & Scope", old: "Country-locked paperwork", new: "Global mathematical proof" },
+    { feature: "Near-Duplicate Detection", old: "Manual copyright search", new: "Neural AI & Vector Indexing" },
+    { feature: "Tamper Resistance", old: "Paper & centralized databases", new: "Immutable Polygon Ledger" },
+    { feature: "Verification Speed", old: "Legal inquiry (weeks)", new: "Instant online search" },
+    { feature: "Commercial Licensing", old: "Complex contract negotiations", new: "Automated smart contract pull-split" },
   ];
 
   return (
-    <section className="relative py-24 px-6">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50/70 border-t border-slate-200/80">
       <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <span className="badge badge-amber mb-4 inline-flex">Why ProofVault</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Traditional vs <span className="gradient-text">ProofVault AI</span>
+        <div className="text-center mb-12">
+          <span className="badge badge-amber mb-3">Comparison</span>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Traditional Registration vs. ProofVault AI
           </h2>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-card overflow-hidden"
-        >
-          <table className="w-full">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <table className="w-full data-table">
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left p-4 text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">Feature</th>
-                <th className="text-center p-4 text-sm font-semibold text-red-400 uppercase tracking-wider">Traditional</th>
-                <th className="text-center p-4 text-sm font-semibold text-green-400 uppercase tracking-wider">ProofVault AI</th>
+              <tr>
+                <th className="p-4 text-left text-xs font-semibold text-slate-600 uppercase">Feature</th>
+                <th className="p-4 text-center text-xs font-semibold text-red-600 uppercase bg-red-50/30">Traditional Copyright</th>
+                <th className="p-4 text-center text-xs font-semibold text-indigo-600 uppercase bg-indigo-50/40">ProofVault AI</th>
               </tr>
             </thead>
             <tbody>
-              {comparisons.map((row, i) => (
-                <tr key={row.feature} className="border-b border-white/3 hover:bg-white/[0.02] transition-colors">
-                  <td className="p-4 text-sm font-medium text-white">{row.feature}</td>
-                  <td className="p-4 text-sm text-center text-[var(--text-muted)]">{row.old}</td>
-                  <td className="p-4 text-sm text-center">
-                    <span className="badge badge-green">{row.new}</span>
+              {comparisons.map((row) => (
+                <tr key={row.feature} className="border-b border-slate-100 hover:bg-slate-50/50">
+                  <td className="p-4 text-xs font-semibold text-slate-900">{row.feature}</td>
+                  <td className="p-4 text-xs text-center text-slate-500">{row.old}</td>
+                  <td className="p-4 text-xs text-center">
+                    <span className="badge badge-green font-medium">{row.new}</span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -656,29 +830,29 @@ function ComparisonSection() {
 function PricingSection() {
   const plans = [
     {
-      name: "Free",
+      name: "Starter",
       price: "$0",
       period: "/month",
-      desc: "Perfect for individuals getting started",
-      features: ["5 registrations/month", "10 verifications/month", "100 MB storage", "Basic dashboard"],
-      cta: "Get Started",
+      desc: "Ideal for individual creators getting started",
+      features: ["5 asset registrations / mo", "Unlimited verification checks", "100 MB IPFS storage", "Basic dashboard"],
+      cta: "Get Started Free",
       highlighted: false,
     },
     {
       name: "Creator",
       price: "$9",
       period: "/month",
-      desc: "For active creators protecting their work",
-      features: ["50 registrations/month", "100 verifications/month", "5 GB storage", "10 NFT mints/month", "1K API calls", "Priority support"],
-      cta: "Start Creating",
+      desc: "For active artists, designers, and developers",
+      features: ["50 registrations / mo", "Unlimited verifications", "5 GB IPFS storage", "10 NFT Proof mints / mo", "Priority support"],
+      cta: "Start Creator Plan",
       highlighted: false,
     },
     {
-      name: "Pro",
+      name: "Pro Studio",
       price: "$29",
       period: "/month",
-      desc: "For professionals and studios",
-      features: ["Unlimited registrations", "Unlimited verifications", "50 GB storage", "Unlimited NFTs", "10K API calls", "Advanced analytics", "Bulk upload", "Custom branding"],
+      desc: "For studios, labels, and power creators",
+      features: ["Unlimited registrations", "Unlimited verifications", "50 GB IPFS storage", "Unlimited NFT Proofs", "10K API calls", "Commercial marketplace"],
       cta: "Go Pro",
       highlighted: true,
     },
@@ -686,122 +860,75 @@ function PricingSection() {
       name: "Enterprise",
       price: "$199",
       period: "/month",
-      desc: "For organizations at scale",
-      features: ["Everything in Pro", "500 GB storage", "100K API calls", "Team management", "Dedicated support", "Custom contracts", "SLA guarantee", "White-label option"],
+      desc: "For digital agencies and enterprise IP portfolios",
+      features: ["Everything in Pro", "500 GB dedicated IPFS", "100K API calls", "Custom smart contracts", "SLA guarantee", "Dedicated account rep"],
       cta: "Contact Sales",
       highlighted: false,
     },
   ];
 
   return (
-    <section id="pricing" className="relative py-24 px-6">
+    <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="badge badge-green mb-4 inline-flex">Pricing</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Simple, <span className="gradient-text">Transparent</span> Pricing
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <span className="badge badge-green mb-3">Transparent Pricing</span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Simple, Predictable Plans
           </h2>
-          <p className="text-[var(--text-secondary)] max-w-xl mx-auto">
-            Start free. Scale as you grow. No hidden fees.
+          <p className="text-base text-slate-600 mt-2">
+            Start free. Upgrade as your digital IP portfolio grows.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {plans.map((plan, i) => (
-            <motion.div
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {plans.map((plan) => (
+            <div
               key={plan.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className={`glass-card p-7 flex flex-col ${
+              className={`bg-white rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all ${
                 plan.highlighted
-                  ? "border-blue-500/40 shadow-[0_0_40px_rgba(59,130,246,0.15)] relative"
-                  : ""
+                  ? "border-2 border-indigo-600 shadow-lg relative ring-4 ring-indigo-50"
+                  : "border border-slate-200 shadow-xs hover:border-slate-300 hover:shadow-sm"
               }`}
             >
               {plan.highlighted && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="badge badge-blue px-4 py-1">Most Popular</span>
+                  <span className="badge badge-blue px-3 py-1 font-bold text-[11px] shadow-xs">
+                    Most Popular
+                  </span>
                 </div>
               )}
-              <h3 className="text-lg font-bold text-white mb-1">{plan.name}</h3>
-              <div className="mb-2">
-                <span className="text-3xl font-extrabold text-white">{plan.price}</span>
-                <span className="text-sm text-[var(--text-muted)]">{plan.period}</span>
-              </div>
-              <p className="text-sm text-[var(--text-secondary)] mb-6">{plan.desc}</p>
-              <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
-                    <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <button className={plan.highlighted ? "btn-primary w-full" : "btn-secondary w-full"}>
-                {plan.cta}
-              </button>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
-// ============================================
-// TECH STACK SECTION
-// ============================================
-function TechStackSection() {
-  const stack = [
-    { category: "Frontend", items: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Framer Motion"] },
-    { category: "Backend", items: ["FastAPI", "Python", "Celery", "WebSocket"] },
-    { category: "Blockchain", items: ["Polygon PoS", "Solidity", "Hardhat", "ethers.js"] },
-    { category: "AI/ML", items: ["CLIP", "CodeBERT", "Whisper", "FAISS", "Sentence-BERT"] },
-    { category: "Storage", items: ["IPFS", "Filecoin", "MongoDB", "Redis", "Milvus"] },
-    { category: "Security", items: ["ZK-Proofs", "AES-256", "SIWE", "Commit-Reveal"] },
-  ];
-
-  return (
-    <section className="relative py-24 px-6">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="badge badge-purple mb-4 inline-flex">Technology</span>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Enterprise-Grade <span className="gradient-text-accent">Tech Stack</span>
-          </h2>
-        </motion.div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stack.map((group, i) => (
-            <motion.div
-              key={group.category}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className="glass-card p-6"
-            >
-              <h3 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider mb-4">{group.category}</h3>
-              <div className="flex flex-wrap gap-2">
-                {group.items.map((item) => (
-                  <span key={item} className="px-3 py-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-sm text-[var(--text-secondary)]">
-                    {item}
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">{plan.name}</h3>
+                <div className="mt-2 mb-3">
+                  <span className="text-3xl font-extrabold text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {plan.price}
                   </span>
-                ))}
+                  <span className="text-xs text-slate-500 font-medium">{plan.period}</span>
+                </div>
+                <p className="text-xs text-slate-600 mb-6">{plan.desc}</p>
+
+                <div className="border-t border-slate-100 pt-5 mb-6 space-y-2.5">
+                  {plan.features.map((f) => (
+                    <div key={f} className="flex items-start gap-2 text-xs text-slate-600">
+                      <Check className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </motion.div>
+
+              <Link
+                href="/dashboard"
+                className={`w-full py-2.5 text-center text-xs font-semibold rounded-lg no-underline transition-all ${
+                  plan.highlighted
+                    ? "btn-primary"
+                    : "btn-secondary"
+                }`}
+              >
+                {plan.cta}
+              </Link>
+            </div>
           ))}
         </div>
       </div>
@@ -810,41 +937,31 @@ function TechStackSection() {
 }
 
 // ============================================
-// CTA SECTION
+// CTA BANNER
 // ============================================
 function CTASection() {
   return (
-    <section className="relative py-24 px-6">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-card p-12 sm:p-16 text-center relative overflow-hidden"
-        >
-          {/* Background glow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-purple-600/10" />
-
-          <div className="relative z-10">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Ready to Protect Your{" "}
-              <span className="gradient-text">Creative Work?</span>
-            </h2>
-            <p className="text-lg text-[var(--text-secondary)] mb-8 max-w-xl mx-auto">
-              Join thousands of creators who trust ProofVault AI to secure their digital assets on the blockchain.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/dashboard" className="btn-primary text-base px-8 py-4 no-underline">
-                <Wallet className="w-5 h-5" />
-                Launch App
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <a href="#how-it-works" className="btn-secondary text-base px-8 py-4 no-underline">
-                Learn More
-              </a>
-            </div>
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50/70 border-t border-slate-200/80">
+      <div className="max-w-4xl mx-auto text-center bg-white border border-slate-200 rounded-3xl p-8 sm:p-14 shadow-md relative overflow-hidden">
+        <div className="relative z-10">
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Ready to Protect Your Digital Work?
+          </h2>
+          <p className="text-base text-slate-600 max-w-xl mx-auto mb-8">
+            Join thousands of creators securing their digital creativity on Polygon with multi-model AI verification.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5">
+            <Link href="/dashboard/upload" className="btn-primary text-sm px-6 py-3 rounded-xl no-underline shadow-md">
+              <Upload className="w-4 h-4" />
+              <span>Register Your First Asset</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link href="/dashboard/verify" className="btn-secondary text-sm px-6 py-3 rounded-xl no-underline">
+              <Search className="w-4 h-4 text-slate-500" />
+              <span>Verify Ownership</span>
+            </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -854,54 +971,65 @@ function CTASection() {
 // FOOTER
 // ============================================
 function Footer() {
-  const links = {
-    Product: ["Features", "Pricing", "API Docs", "Changelog"],
-    Resources: ["Documentation", "Blog", "Tutorials", "FAQ"],
-    Company: ["About", "Careers", "Contact", "Press"],
-    Legal: ["Privacy Policy", "Terms of Service", "Cookie Policy"],
-  };
-
   return (
-    <footer className="border-t border-white/5 py-16 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
+    <footer className="bg-white border-t border-slate-200 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-8 mb-10">
+          <div className="col-span-2">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-white" />
               </div>
-              <span className="text-lg font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Proof<span className="gradient-text">Vault</span>
+              <span className="text-base font-bold text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Proof<span className="text-indigo-600">Vault</span> AI
               </span>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] max-w-xs leading-relaxed">
-              Protecting digital creativity through AI & blockchain. Immutable ownership proof for the creator economy.
+            <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
+              Decentralized digital IP protection, perceptual AI similarity detection, and ownership certificate anchoring on Polygon.
             </p>
-          </div>
-          {Object.entries(links).map(([category, items]) => (
-            <div key={category}>
-              <h4 className="text-sm font-semibold text-white mb-4">{category}</h4>
-              <ul className="space-y-2">
-                {items.map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-sm text-[var(--text-muted)] hover:text-white transition-colors no-underline">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+            <div className="flex items-center gap-2 mt-4 text-[11px] text-slate-500">
+              <span>Network:</span>
+              <span className="badge badge-purple text-[10px]">Polygon Amoy</span>
+              <span className="badge badge-cyan text-[10px]">IPFS Pinata</span>
             </div>
-          ))}
-        </div>
-        <div className="border-t border-white/5 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-[var(--text-muted)]">
-            © {new Date().getFullYear()} ProofVault AI. All rights reserved.
-          </p>
-          <div className="flex items-center gap-4 text-[var(--text-muted)]">
-            <span className="text-xs">Built on</span>
-            <span className="badge badge-purple text-xs">Polygon</span>
-            <span className="badge badge-blue text-xs">IPFS</span>
           </div>
+
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Platform</h4>
+            <ul className="space-y-2 text-xs text-slate-600">
+              <li><Link href="/dashboard/upload" className="hover:text-indigo-600 no-underline">Upload Asset</Link></li>
+              <li><Link href="/dashboard/verify" className="hover:text-indigo-600 no-underline">Verify Ownership</Link></li>
+              <li><Link href="/dashboard/assets" className="hover:text-indigo-600 no-underline">Asset Library</Link></li>
+              <li><Link href="/dashboard/marketplace" className="hover:text-indigo-600 no-underline">IP Marketplace</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Resources</h4>
+            <ul className="space-y-2 text-xs text-slate-600">
+              <li><a href="#how-it-works" className="hover:text-indigo-600 no-underline">How It Works</a></li>
+              <li><a href="#technology" className="hover:text-indigo-600 no-underline">Technology</a></li>
+              <li><a href="#pricing" className="hover:text-indigo-600 no-underline">Pricing</a></li>
+              <li><Link href="/dashboard/analytics" className="hover:text-indigo-600 no-underline">Analytics</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Account</h4>
+            <ul className="space-y-2 text-xs text-slate-600">
+              <li><Link href="/auth/login" className="hover:text-indigo-600 no-underline">Sign In</Link></li>
+              <li><Link href="/auth/signup" className="hover:text-indigo-600 no-underline">Create Account</Link></li>
+              <li><Link href="/dashboard/profile" className="hover:text-indigo-600 no-underline">Profile</Link></li>
+              <li><Link href="/dashboard/settings" className="hover:text-indigo-600 no-underline">Settings</Link></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-100 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
+          <p>© {new Date().getFullYear()} ProofVault AI. All rights reserved.</p>
+          <p className="text-[11px] text-slate-400">
+            Immutable Cryptographic Proofs • Non-Custodial • Powered by Polygon & AI
+          </p>
         </div>
       </div>
     </footer>
@@ -913,16 +1041,16 @@ function Footer() {
 // ============================================
 export default function LandingPage() {
   return (
-    <main className="relative min-h-screen bg-[var(--bg-primary)]">
-      <ParticleField />
+    <main className="relative min-h-screen bg-white text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
+      <LightParticleField />
       <Navbar />
       <HeroSection />
+      <TrustSection />
       <WorkflowSection />
       <FeaturesSection />
       <ContentSection />
       <ComparisonSection />
       <PricingSection />
-      <TechStackSection />
       <CTASection />
       <Footer />
     </main>

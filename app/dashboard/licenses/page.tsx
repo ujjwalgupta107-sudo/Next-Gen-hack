@@ -9,6 +9,9 @@ import {
   DollarSign,
   Users,
   Loader2,
+  Calendar,
+  ExternalLink,
+  Shield,
 } from "lucide-react";
 import { ethers } from "ethers";
 import { LICENSING_CONTRACT_ADDRESS } from "../../lib/store";
@@ -52,7 +55,7 @@ export default function LicensesPage() {
         const contract = new ethers.Contract(LICENSING_CONTRACT_ADDRESS, LICENSING_ABI, signer);
         const tx = await contract.withdrawFunds();
         await tx.wait();
-        setWithdrawMsg(`Withdrawn successfully! Tx: ${tx.hash.slice(0, 10)}...`);
+        setWithdrawMsg(`Withdrawn successfully on Polygon Amoy! Tx: ${tx.hash.slice(0, 10)}...`);
       } else {
         setWithdrawMsg("Connect MetaMask on Polygon Amoy to withdraw earnings.");
       }
@@ -65,126 +68,133 @@ export default function LicensesPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            <FileKey className="w-6 h-6 text-green-400" />
-            License Management & Pull-Withdrawals
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <FileKey className="w-4 h-4" />
+            </div>
+            <span>License Management & Pull-Withdrawals</span>
           </h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">
-            Manage licensing terms, view active licenses, and withdraw accumulated smart contract earnings.
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            Manage commercial licensing terms, view active licenses, and withdraw accumulated smart contract earnings.
           </p>
         </div>
         <button
           onClick={handleWithdrawFunds}
           disabled={isWithdrawing}
-          className="btn-primary text-xs py-2 px-4 flex items-center gap-2"
+          className="btn-primary text-xs py-2.5 px-4 flex items-center gap-2 shadow-xs shrink-0"
         >
           {isWithdrawing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <DollarSign className="w-3.5 h-3.5" />}
-          Withdraw Revenue (0.32 MATIC)
+          <span>Withdraw Revenue (0.32 MATIC)</span>
         </button>
       </div>
 
       {withdrawMsg && (
-        <div className="glass-card p-3 border border-blue-500/30 text-xs text-blue-400">
-          {withdrawMsg}
+        <div className="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl p-3.5 text-xs font-semibold shadow-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <span>{withdrawMsg}</span>
         </div>
       )}
 
-      {/* Stats */}
+      {/* Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Active Licenses", value: "23", icon: CheckCircle2, color: "text-green-400" },
-          { label: "Total Revenue", value: "0.32 MATIC", icon: DollarSign, color: "text-blue-400" },
-          { label: "Licensees", value: "18", icon: Users, color: "text-purple-400" },
-          { label: "Expiring Soon", value: "3", icon: AlertCircle, color: "text-amber-400" },
+          { label: "Active Licenses", value: "23", icon: CheckCircle2, bg: "bg-green-50", color: "text-green-600" },
+          { label: "Accumulated Revenue", value: "0.32 MATIC", icon: DollarSign, bg: "bg-indigo-50", color: "text-indigo-600" },
+          { label: "Total Licensees", value: "18", icon: Users, bg: "bg-purple-50", color: "text-purple-600" },
+          { label: "Expiring in 30d", value: "3", icon: AlertCircle, bg: "bg-amber-50", color: "text-amber-600" },
         ].map((s) => (
-          <div key={s.label} className="stat-card">
-            <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
-            <div className="text-xl font-bold text-white">{s.value}</div>
-            <div className="text-[11px] text-[var(--text-muted)]">{s.label}</div>
+          <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`w-7 h-7 rounded-lg ${s.bg} ${s.color} flex items-center justify-center`}>
+                <s.icon className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-[11px] text-slate-500 font-medium">{s.label}</span>
+            </div>
+            <div className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.value}</div>
           </div>
         ))}
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-4 border-b border-white/5 pb-0">
-        {(["issued", "purchased"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`pb-3 text-sm font-medium border-b-2 transition-all capitalize ${
-              tab === t
-                ? "border-blue-500 text-white"
-                : "border-transparent text-[var(--text-muted)] hover:text-white"
-            }`}
-          >
-            {t === "issued" ? "Licenses Issued" : "Licenses Purchased"}
-          </button>
-        ))}
+      {/* Tabs & Status Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div className="flex items-center gap-4">
+          {(["issued", "purchased"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`pb-2 text-xs font-semibold border-b-2 transition-all capitalize ${
+                tab === t
+                  ? "border-indigo-600 text-indigo-600"
+                  : "border-transparent text-slate-500 hover:text-slate-900"
+              }`}
+            >
+              {t === "issued" ? "Licenses Issued by You" : "Licenses Purchased"}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          {["all", "active", "expired"].map((st) => (
+            <button
+              key={st}
+              onClick={() => setFilterStatus(st)}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
+                filterStatus === st
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 bg-white border border-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              {st}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Status Filters */}
-      <div className="flex gap-2">
-        {["all", "active", "pending", "expired"].map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilterStatus(s)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
-              filterStatus === s
-                ? "bg-blue-500/15 text-blue-400 border border-blue-500/25"
-                : "text-[var(--text-muted)] hover:text-white bg-white/[0.02] border border-transparent"
-            }`}
-          >
-            {s === "all" ? "All Statuses" : s}
-          </button>
-        ))}
-      </div>
-
-      {/* License List */}
-      <div className="space-y-3">
-        {filtered.map((license, i) => (
-          <motion.div
-            key={license.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="glass-card p-5"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
-                  <FileKey className="w-5 h-5 text-green-400" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-white">{license.asset}</h3>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <span className={`badge ${TYPE_COLORS[license.type]} text-[10px]`}>{license.type}</span>
-                    <span className={`badge ${STATUS_COLORS[license.status]} text-[10px] capitalize`}>{license.status}</span>
-                    <span className="text-xs text-[var(--text-muted)] font-mono">{license.licensee}</span>
+      {/* Licenses Table */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+        <table className="w-full data-table">
+          <thead>
+            <tr>
+              <th className="p-4 text-left text-xs font-semibold text-slate-600 uppercase">Licensed Asset</th>
+              <th className="p-4 text-left text-xs font-semibold text-slate-600 uppercase">License Tier</th>
+              <th className="p-4 text-left text-xs font-semibold text-slate-600 uppercase">Licensee</th>
+              <th className="p-4 text-left text-xs font-semibold text-slate-600 uppercase">Price Paid</th>
+              <th className="p-4 text-center text-xs font-semibold text-slate-600 uppercase">Status</th>
+              <th className="p-4 text-right text-xs font-semibold text-slate-600 uppercase">Valid Until</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((lic) => (
+              <tr key={lic.id} className="border-b border-slate-100 hover:bg-slate-50">
+                <td className="p-4">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <span className="text-xs font-bold text-slate-900">{lic.asset}</span>
                   </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-6 text-sm">
-                <div className="text-right">
-                  <p className="text-[var(--text-muted)] text-[11px]">Price</p>
-                  <p className="font-semibold text-white">{license.price}</p>
-                </div>
-                <div className="text-right hidden sm:block">
-                  <p className="text-[var(--text-muted)] text-[11px]">Usage Count</p>
-                  <p className="text-white">{license.usageCount}{license.usageLimit > 0 ? `/${license.usageLimit}` : "/∞"}</p>
-                </div>
-                <div className="text-right hidden md:block">
-                  <p className="text-[var(--text-muted)] text-[11px]">Expiration</p>
-                  <p className="text-white text-xs">{license.endDate || "Perpetual"}</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+                </td>
+                <td className="p-4">
+                  <span className={`badge ${TYPE_COLORS[lic.type]} text-[10px]`}>{lic.type}</span>
+                </td>
+                <td className="p-4 font-mono text-xs text-slate-600">
+                  {lic.licensee}
+                </td>
+                <td className="p-4 text-xs font-bold text-slate-900">
+                  {lic.price}
+                </td>
+                <td className="p-4 text-center">
+                  <span className={`badge ${STATUS_COLORS[lic.status]} text-[10px] capitalize`}>{lic.status}</span>
+                </td>
+                <td className="p-4 text-right text-xs text-slate-500">
+                  {lic.endDate || "Perpetual"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

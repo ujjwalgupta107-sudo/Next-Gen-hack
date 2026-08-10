@@ -181,7 +181,7 @@
     "refreshTokenHash": "782562a6b7d4ade1088c57e3a6df2c8a81d3998685da6ffa5009cc060626bd17",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
     "ipAddress": "::1",
-    "isValid": true,
+    "isValid": false,
     "expiresAt": "2026-09-07T14:04:32.250Z",
     "lastUsedAt": "2026-08-08T14:04:34.765Z"
   },

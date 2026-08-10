@@ -18,6 +18,9 @@ import {
   Download,
   Sparkles,
   AlertCircle,
+  AlertTriangle,
+  FileText,
+  Lock,
 } from "lucide-react";
 import {
   generateSHA256,
@@ -60,7 +63,7 @@ interface StageInfo {
 
 const STAGES: Record<string, StageInfo> = {
   analyzing: { label: "AI Analysis", description: "Scanning content and extracting vision/text embeddings...", icon: Brain },
-  hashing: { label: "Hash Generation", description: "Computing native Web Crypto SHA-256, SHA3-256 & BLAKE3...", icon: Hash },
+  hashing: { label: "Cryptographic Hash Generation", description: "Computing native Web Crypto SHA-256, SHA3-256 & BLAKE3...", icon: Hash },
   fingerprinting: { label: "2D-DCT Perceptual Hashing", description: "Generating canvas luminance DCT perceptual hash...", icon: Fingerprint },
   ipfs: { label: "IPFS Decentralized Storage", description: "Pinning asset and metadata to Pinata IPFS network...", icon: Globe },
   blockchain: { label: "Polygon Smart Contract Anchoring", description: "Executing OwnershipRegistry transaction...", icon: Blocks },
@@ -225,13 +228,15 @@ export default function UploadPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          <Upload className="w-6 h-6 text-blue-400" />
-          Upload & Register Digital Asset
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2.5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <Upload className="w-4 h-4" />
+          </div>
+          <span>Upload & Register Digital IP</span>
         </h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Upload any creative work or codebase to create immutable, mathematically verifiable ownership proof on Polygon.
+        <p className="text-xs sm:text-sm text-slate-600 mt-1.5">
+          Generate immutable, mathematically verifiable cryptographic proof and anchor on Polygon Amoy with decentralized IPFS pinning.
         </p>
       </div>
 
@@ -240,9 +245,9 @@ export default function UploadPage() {
           /* ============ UPLOAD FORM ============ */
           <motion.div
             key="form"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -10 }}
             className="space-y-6"
           >
             {/* Drop Zone */}
@@ -262,20 +267,20 @@ export default function UploadPage() {
                 className="hidden"
                 onChange={handleFileSelect}
               />
-              <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-4 text-blue-400 group-hover:scale-110 transition-transform">
-                <Upload className="w-8 h-8" />
+              <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
+                <Upload className="w-6 h-6" />
               </div>
-              <p className="text-base font-medium text-white mb-1">
+              <p className="text-sm sm:text-base font-bold text-slate-900 mb-1">
                 {file ? file.name : "Drag & drop your digital asset here"}
               </p>
-              <p className="text-xs text-[var(--text-muted)] mb-3">
+              <p className="text-xs text-slate-500 mb-4 max-w-md mx-auto">
                 {file
-                  ? `${formatFileSize(file.size)} • Ready to register`
-                  : "Supports High-Res Images, Audio, Video, PDF Documents, and Source Code Repositories"}
+                  ? `${formatFileSize(file.size)} • Ready for cryptographic analysis`
+                  : "Supports High-Res Images (PNG, JPG), Audio (MP3, WAV), Video (MP4), Code Repositories, PDF Documents, and 3D Assets"}
               </p>
               <button
                 type="button"
-                className="btn-secondary text-xs py-2 px-4"
+                className="btn-secondary text-xs py-2 px-4 shadow-xs"
                 onClick={(e) => {
                   e.stopPropagation();
                   fileInputRef.current?.click();
@@ -290,54 +295,56 @@ export default function UploadPage() {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
-                className="glass-card p-6 space-y-4"
+                className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-xs"
               >
-                <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                  <span className="text-sm font-semibold text-white">Asset Details</span>
-                  <span className="badge badge-blue text-[10px]">{detectContentType(file.name, file.type)}</span>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <span className="text-sm font-bold text-slate-900">Asset Metadata & Licensing</span>
+                  <span className="badge badge-blue text-[11px]">{detectContentType(file.name, file.type)}</span>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Asset Title</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">Asset Title</label>
                   <input
                     type="text"
-                    className="glass-input"
-                    placeholder="e.g. Master Audio Mix / Artwork v1"
+                    className="input-field"
+                    placeholder="e.g. Master Audio Mix / Original Artwork v1"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Description & Licensing Notes</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">Description & Authorship Notes</label>
                   <textarea
                     rows={3}
-                    className="glass-input resize-none"
-                    placeholder="Describe authorship context, creation tools, or license terms..."
+                    className="input-field resize-none"
+                    placeholder="Provide creation context, software tools used, and copyright terms..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                   <div className="flex items-center gap-3">
-                    <Sparkles className="w-5 h-5 text-purple-400" />
+                    <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
                     <div>
-                      <p className="text-xs font-semibold text-white">Mint Proof-of-Ownership NFT</p>
-                      <p className="text-[11px] text-[var(--text-muted)]">Mint ERC-721 token bound to smart contract registration hash</p>
+                      <p className="text-xs font-bold text-slate-900">Mint Proof-of-Ownership NFT</p>
+                      <p className="text-[11px] text-slate-500">Mint ERC-721 token bound to your smart contract registration hash</p>
                     </div>
                   </div>
                   <input
                     type="checkbox"
                     checked={mintNFT}
                     onChange={(e) => setMintNFT(e.target.checked)}
-                    className="w-4 h-4 rounded text-blue-500 bg-white/5 border-white/20 focus:ring-0 cursor-pointer"
+                    className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
                   />
                 </div>
 
-                <button onClick={handleRegister} className="btn-primary w-full py-3 text-sm">
+                <button onClick={handleRegister} className="btn-primary w-full py-3 text-sm shadow-md">
                   <Shield className="w-4 h-4" />
-                  Execute Cryptographic Registration
+                  <span>Execute Cryptographic Registration</span>
                 </button>
               </motion.div>
             )}
@@ -346,66 +353,70 @@ export default function UploadPage() {
           /* ============ CERTIFICATE VIEW ============ */
           <motion.div
             key="certificate"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass-card p-8 border border-green-500/30 space-y-6"
+            className="bg-white border border-green-200 rounded-2xl p-6 sm:p-8 space-y-6 shadow-md"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/30 flex items-center justify-center text-green-400">
+                <div className="w-11 h-11 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Proof-of-Ownership Certificate</h2>
-                  <p className="text-xs text-[var(--text-secondary)]">Permanent Cryptographic Evidence on Polygon Blockchain</p>
+                  <h2 className="text-lg font-bold text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    Proof-of-Ownership Certificate
+                  </h2>
+                  <p className="text-xs text-slate-500">Permanent Cryptographic Evidence on Polygon Amoy Blockchain</p>
                 </div>
               </div>
-              <span className="badge badge-green">Verified Immutable</span>
+              <span className="badge badge-green self-start sm:self-auto text-xs py-1 px-3">
+                Verified Immutable
+              </span>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-black/40 border border-white/5 text-xs">
+            <div className="grid sm:grid-cols-2 gap-4 p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
               <div>
-                <p className="text-[var(--text-muted)]">Asset Title</p>
-                <p className="font-semibold text-white text-sm mt-0.5">{result.title}</p>
+                <p className="text-slate-500 font-medium">Asset Title</p>
+                <p className="font-bold text-slate-900 text-sm mt-0.5">{result.title}</p>
               </div>
               <div>
-                <p className="text-[var(--text-muted)]">Owner Address</p>
-                <p className="font-mono text-blue-400 mt-0.5">{result.ownerAddress}</p>
+                <p className="text-slate-500 font-medium">Owner Wallet Address</p>
+                <p className="font-mono font-semibold text-indigo-600 mt-0.5 break-all">{result.ownerAddress}</p>
               </div>
               <div>
-                <p className="text-[var(--text-muted)]">Primary SHA-256 Hash</p>
-                <p className="font-mono text-[var(--text-secondary)] mt-0.5 truncate">{result.fingerprints.sha256}</p>
+                <p className="text-slate-500 font-medium">Primary SHA-256 Hash</p>
+                <p className="font-mono text-slate-700 mt-0.5 truncate bg-white p-1.5 rounded border border-slate-200">{result.fingerprints.sha256}</p>
               </div>
               <div>
-                <p className="text-[var(--text-muted)]">2D-DCT Perceptual Hash (pHash)</p>
-                <p className="font-mono text-purple-400 mt-0.5">{result.fingerprints.phash || "N/A"}</p>
+                <p className="text-slate-500 font-medium">2D-DCT Perceptual Hash (pHash)</p>
+                <p className="font-mono text-purple-700 mt-0.5 truncate bg-white p-1.5 rounded border border-slate-200">{result.fingerprints.phash || "N/A"}</p>
               </div>
               <div>
-                <p className="text-[var(--text-muted)]">IPFS Content Identifier (CID)</p>
-                <p className="font-mono text-cyan-400 mt-0.5 truncate">{result.ipfsCID}</p>
+                <p className="text-slate-500 font-medium">IPFS Content Identifier (CID)</p>
+                <p className="font-mono text-cyan-700 mt-0.5 truncate bg-white p-1.5 rounded border border-slate-200">{result.ipfsCID}</p>
               </div>
               <div>
-                <p className="text-[var(--text-muted)]">Polygon Transaction Hash</p>
-                <p className="font-mono text-amber-400 mt-0.5 truncate">{result.blockchain.txHash}</p>
+                <p className="text-slate-500 font-medium">Polygon Transaction Hash</p>
+                <p className="font-mono text-amber-700 mt-0.5 truncate bg-white p-1.5 rounded border border-slate-200">{result.blockchain.txHash}</p>
               </div>
             </div>
 
-            {/* Legal Disclaimer */}
-            <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 text-[11px] text-[var(--text-secondary)] leading-relaxed">
-              <strong className="text-white">Legal Notice:</strong> Blockchain registration provides mathematical, timestamped proof of existence and cryptographic ownership evidence. It does not replace statutory government copyright registration where required for statutory damage enforcement.
+            {/* Legal Notice */}
+            <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-xs text-slate-700 leading-relaxed">
+              <strong className="text-slate-900 font-semibold">Legal Notice:</strong> Blockchain registration provides mathematical, timestamped proof of existence and cryptographic ownership evidence. It provides immutable prior-art evidence in copyright disputes.
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={() => copyToClipboard(result.fingerprints.sha256, "hash")}
                 className="btn-secondary flex-1 text-xs py-2.5"
               >
                 <Copy className="w-4 h-4" />
-                {copied === "hash" ? "Copied!" : "Copy SHA-256 Hash"}
+                <span>{copied === "hash" ? "Copied to Clipboard!" : "Copy SHA-256 Hash"}</span>
               </button>
-              <button onClick={resetUpload} className="btn-primary flex-1 text-xs py-2.5">
+              <button onClick={resetUpload} className="btn-primary flex-1 text-xs py-2.5 shadow-sm">
                 <FileCheck className="w-4 h-4" />
-                Register Another Asset
+                <span>Register Another Asset</span>
               </button>
             </div>
           </motion.div>
@@ -413,21 +424,21 @@ export default function UploadPage() {
           /* ============ DUPLICATE ALERT ============ */
           <motion.div
             key="duplicate"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-8 border border-amber-500/30 space-y-4"
+            className="bg-white border border-amber-300 rounded-2xl p-6 sm:p-8 space-y-4 shadow-sm"
           >
-            <div className="flex items-center gap-3 text-amber-400">
-              <AlertCircle className="w-8 h-8 shrink-0" />
+            <div className="flex items-center gap-3 text-amber-600">
+              <AlertTriangle className="w-8 h-8 shrink-0" />
               <div>
-                <h2 className="text-lg font-bold text-white">Duplicate Asset Detected</h2>
-                <p className="text-xs text-[var(--text-muted)]">This exact SHA-256 cryptographic hash is already registered in ProofVault.</p>
+                <h2 className="text-base font-bold text-slate-900">Duplicate Asset Detected</h2>
+                <p className="text-xs text-slate-500">This exact SHA-256 cryptographic hash is already registered in ProofVault.</p>
               </div>
             </div>
-            <div className="p-4 rounded-xl bg-black/40 border border-white/5 text-xs space-y-2">
-              <p><span className="text-[var(--text-muted)]">Registered Title:</span> <span className="text-white font-medium">{result.title}</span></p>
-              <p><span className="text-[var(--text-muted)]">Original Owner:</span> <span className="font-mono text-blue-400">{result.ownerAddress}</span></p>
-              <p><span className="text-[var(--text-muted)]">Timestamp:</span> <span className="text-white">{formatDate(result.createdAt)}</span></p>
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+              <p><span className="text-slate-500">Registered Title:</span> <span className="text-slate-900 font-bold">{result.title}</span></p>
+              <p><span className="text-slate-500">Original Owner:</span> <span className="font-mono text-indigo-600">{result.ownerAddress}</span></p>
+              <p><span className="text-slate-500">Timestamp:</span> <span className="text-slate-800">{formatDate(result.createdAt)}</span></p>
             </div>
             <button onClick={resetUpload} className="btn-secondary w-full py-2.5 text-xs">
               Upload a Different File
@@ -437,15 +448,15 @@ export default function UploadPage() {
           /* ============ ERROR VIEW ============ */
           <motion.div
             key="error"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-8 border border-red-500/30 space-y-4"
+            className="bg-white border border-red-200 rounded-2xl p-6 sm:p-8 space-y-4 shadow-sm"
           >
-            <div className="flex items-center gap-3 text-red-400">
-              <AlertCircle className="w-8 h-8" />
+            <div className="flex items-center gap-3 text-red-600">
+              <AlertCircle className="w-8 h-8 shrink-0" />
               <div>
-                <h2 className="text-lg font-bold text-white">Registration Error</h2>
-                <p className="text-xs text-[var(--text-muted)]">{errorMessage || "Registration failed. Please check wallet connection and network."}</p>
+                <h2 className="text-base font-bold text-slate-900">Registration Error</h2>
+                <p className="text-xs text-slate-500">{errorMessage || "Registration failed. Please check wallet connection and network."}</p>
               </div>
             </div>
             <button onClick={resetUpload} className="btn-secondary w-full py-2.5 text-xs">
@@ -453,23 +464,25 @@ export default function UploadPage() {
             </button>
           </motion.div>
         ) : (
-          /* ============ REAL PROCESSING PIPELINE ============ */
+          /* ============ PROCESSING PIPELINE ============ */
           <motion.div
             key="processing"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="glass-card p-8 text-center space-y-6"
+            className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm"
           >
-            <div className="w-16 h-16 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto text-blue-400">
-              <Loader2 className="w-8 h-8 animate-spin" />
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-indigo-600 shadow-xs">
+              <Loader2 className="w-7 h-7 animate-spin" />
             </div>
 
             <div>
-              <h2 className="text-lg font-bold text-white">{STAGES[stage]?.label || "Processing Asset..."}</h2>
-              <p className="text-xs text-[var(--text-secondary)] mt-1">{STAGES[stage]?.description || "Executing cryptographic pipeline..."}</p>
+              <h2 className="text-base font-bold text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                {STAGES[stage]?.label || "Processing Asset..."}
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">{STAGES[stage]?.description || "Executing cryptographic pipeline..."}</p>
             </div>
 
-            <div className="max-w-md mx-auto space-y-2">
+            <div className="max-w-md mx-auto space-y-2 text-left">
               {Object.entries(STAGES).filter(([k]) => k !== "complete").map(([key, info]) => {
                 const isCurrent = stage === key;
                 const IconComp = info.icon;
@@ -478,15 +491,15 @@ export default function UploadPage() {
                     key={key}
                     className={`flex items-center justify-between p-3 rounded-xl text-xs transition-all ${
                       isCurrent
-                        ? "bg-blue-500/15 text-white border border-blue-500/30 font-medium"
-                        : "text-[var(--text-muted)] bg-white/[0.02]"
+                        ? "bg-indigo-50 text-indigo-900 border border-indigo-200 font-semibold"
+                        : "text-slate-500 bg-slate-50 border border-slate-100"
                     }`}
                   >
                     <span className="flex items-center gap-2.5">
-                      <IconComp className={`w-4 h-4 ${isCurrent ? "text-blue-400" : ""}`} />
+                      <IconComp className={`w-4 h-4 ${isCurrent ? "text-indigo-600" : "text-slate-400"}`} />
                       {info.label}
                     </span>
-                    {isCurrent && <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />}
+                    {isCurrent && <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />}
                   </div>
                 );
               })}

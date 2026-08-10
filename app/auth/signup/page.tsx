@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth, UserRole } from '@/app/lib/auth-context';
-import { ShieldCheck, Mail, Lock, User, Wallet, ArrowRight, AlertCircle, Sparkles, Building, Palette } from 'lucide-react';
+import { Shield, Mail, Lock, User, Wallet, ArrowRight, AlertCircle, Sparkles, Building, Palette } from 'lucide-react';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -64,52 +64,55 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
-      {/* Glow backgrounds */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[400px] bg-gradient-to-tr from-cyan-500/20 via-purple-500/20 to-pink-500/10 blur-[130px] rounded-full pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+      {/* Subtle Ambient Light Glow */}
+      <div className="light-ambient-glow w-[550px] h-[400px] bg-indigo-200/40 top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute inset-0 light-grid-pattern opacity-40 pointer-events-none" />
 
       <div className="w-full max-w-lg relative z-10">
-        {/* Branding */}
+        {/* Branding Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3 group mb-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 p-[2px] shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-cyan-400" />
-              </div>
+          <Link href="/" className="inline-flex items-center gap-2.5 group mb-3 no-underline">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-xs group-hover:bg-indigo-700 transition-colors">
+              <Shield className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
-              ProofVault <span className="text-cyan-400">AI</span>
+            <span className="font-bold text-2xl tracking-tight text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Proof<span className="text-indigo-600">Vault</span> AI
             </span>
           </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Create Your Account</h1>
-          <p className="text-sm text-slate-400 mt-1">Anchor, verify, and license your digital assets cryptographically</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Create Your Creator Account
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            Anchor, verify, and license your digital IP cryptographically on Polygon
+          </p>
         </div>
 
-        {/* Card */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-black/50">
-          {/* Quick MetaMask option */}
+        {/* Card Container */}
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50">
+          {/* Quick MetaMask button */}
           <button
             type="button"
             onClick={handleMetaMaskSignup}
             disabled={isSubmitting || isLoading}
-            className="w-full mb-6 py-3 px-4 rounded-xl font-semibold text-xs bg-slate-950 border border-slate-800 hover:border-purple-500 text-purple-300 hover:text-white flex items-center justify-center gap-2 transition-all shadow-md group"
+            className="w-full mb-5 py-3 px-4 rounded-xl font-semibold text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 text-indigo-700 hover:text-indigo-900 flex items-center justify-center gap-2 transition-all shadow-xs"
           >
-            <Wallet className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+            <Wallet className="w-4 h-4 text-indigo-600" />
             <span>Fast Sign-In with MetaMask (SIWE)</span>
           </button>
 
-          <div className="relative flex items-center justify-center mb-6">
-            <div className="border-t border-slate-800 w-full" />
-            <span className="bg-slate-900 px-3 text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+          <div className="relative flex items-center justify-center mb-5">
+            <div className="border-t border-slate-200 w-full" />
+            <span className="bg-white px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Or sign up with email
             </span>
-            <div className="border-t border-slate-800 w-full" />
+            <div className="border-t border-slate-200 w-full" />
           </div>
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-950/40 border border-red-800/50 flex items-start gap-3 text-red-300 text-xs">
-              <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+            <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2.5 text-red-700 text-xs font-medium">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
@@ -117,97 +120,93 @@ export default function SignupPage() {
           <form onSubmit={handleSignup} className="space-y-4">
             {/* Account Role Selector */}
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-2">Select Account Type</label>
-              <div className="grid grid-cols-2 gap-3">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Account Type</label>
+              <div className="grid grid-cols-2 gap-2.5">
                 <button
                   type="button"
                   onClick={() => setRole('creator')}
-                  className={`p-3 rounded-xl border flex items-center gap-3 transition-all text-left ${
+                  className={`p-3 rounded-xl border flex items-center gap-2.5 transition-all text-left ${
                     role === 'creator'
-                      ? 'bg-cyan-950/40 border-cyan-500 text-white shadow-md shadow-cyan-500/10'
-                      : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700'
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-900 shadow-xs'
+                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
                   }`}
                 >
-                  <Palette className={`w-5 h-5 ${role === 'creator' ? 'text-cyan-400' : 'text-slate-500'}`} />
+                  <Palette className={`w-4 h-4 ${role === 'creator' ? 'text-indigo-600' : 'text-slate-400'}`} />
                   <div>
-                    <div className="text-xs font-semibold">Creator</div>
-                    <div className="text-[10px] text-slate-400">Artists, Devs, Writers</div>
+                    <div className="text-xs font-bold">Individual Creator</div>
+                    <div className="text-[10px] text-slate-500">Artists, Devs, Writers</div>
                   </div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setRole('enterprise')}
-                  className={`p-3 rounded-xl border flex items-center gap-3 transition-all text-left ${
+                  className={`p-3 rounded-xl border flex items-center gap-2.5 transition-all text-left ${
                     role === 'enterprise'
-                      ? 'bg-purple-950/40 border-purple-500 text-white shadow-md shadow-purple-500/10'
-                      : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700'
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-900 shadow-xs'
+                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
                   }`}
                 >
-                  <Building className={`w-5 h-5 ${role === 'enterprise' ? 'text-purple-400' : 'text-slate-500'}`} />
+                  <Building className={`w-4 h-4 ${role === 'enterprise' ? 'text-indigo-600' : 'text-slate-400'}`} />
                   <div>
-                    <div className="text-xs font-semibold">Enterprise</div>
-                    <div className="text-[10px] text-slate-400">Teams & Studios</div>
+                    <div className="text-xs font-bold">Studio / Agency</div>
+                    <div className="text-[10px] text-slate-500">Teams & Catalogs</div>
                   </div>
                 </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">Username</label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                    placeholder="creator_99"
-                    className="w-full bg-slate-950/60 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-slate-600 outline-none transition"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">Full Name</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
                 <input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Satoshi Nakamoto"
-                  className="w-full bg-slate-950/60 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-slate-600 outline-none transition"
+                  placeholder="Jane Doe"
+                  className="input-field text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Username</label>
+                <input
+                  type="text"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="janedoe"
+                  className="input-field text-xs"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Email Address</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="creator@proofvault.ai"
-                  className="w-full bg-slate-950/60 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-slate-600 outline-none transition"
+                  className="input-field pl-10 text-xs"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Password</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
-                  className="w-full bg-slate-950/60 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-slate-600 outline-none transition"
+                  placeholder="Min. 8 characters"
+                  className="input-field pl-10 text-xs"
                 />
               </div>
             </div>
@@ -218,34 +217,31 @@ export default function SignupPage() {
                 id="terms"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="rounded bg-slate-950 border-slate-800 text-cyan-500 focus:ring-cyan-500 h-4 w-4"
+                className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
               />
-              <label htmlFor="terms" className="text-xs text-slate-400 cursor-pointer">
-                I agree to ProofVault AI&apos;s Terms of Service & Privacy Policy
+              <label htmlFor="terms" className="text-xs text-slate-600 cursor-pointer">
+                I agree to the{' '}
+                <a href="#" className="text-indigo-600 hover:underline font-medium">Terms of Service</a>
+                {' '}and{' '}
+                <a href="#" className="text-indigo-600 hover:underline font-medium">Privacy Policy</a>
               </label>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting || isLoading}
-              className="w-full mt-2 py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:opacity-90 text-white shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              className="btn-primary w-full py-3 text-xs font-semibold shadow-md mt-2"
             >
-              {isSubmitting ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  Create Account
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              <span>{isSubmitting ? 'Creating Account...' : 'Create Account'}</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
           {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-slate-800/80 text-center text-xs text-slate-400">
+          <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-600">
             Already have an account?{' '}
-            <Link href="/auth/login" className="font-semibold text-cyan-400 hover:text-cyan-300 hover:underline">
-              Sign in
+            <Link href="/auth/login" className="font-semibold text-indigo-600 hover:text-indigo-700 no-underline">
+              Sign In
             </Link>
           </div>
         </div>
